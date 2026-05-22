@@ -1,9 +1,11 @@
 spring:
-  profiles:
-    include: secret
+  config:
+    import: "optional:classpath:application-secret.yml"
   datasource:
-    url: "jdbc:mysql://localhost:3306/caring?serverTimezone=Asia/Seoul&characterEncoding=UTF-8"
+    url: "jdbc:mysql://localhost:3306/caringdb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8"
     driver-class-name: com.mysql.cj.jdbc.Driver
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
   jpa:
     hibernate:
       ddl-auto: update
