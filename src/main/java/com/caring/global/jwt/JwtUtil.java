@@ -76,7 +76,7 @@ public class JwtUtil {
         return Jwts.parser() // 토큰 열 준비
                 .verifyWith(secretKey)// 우리 키로 확인
                 .build() //  파서 완성
-                .parseEncryptedClaims(token) // 토큰 실제로 파싱
+                .parseSignedClaims(token) // 토큰 실제로 파싱
                 .getPayload(); // 안에 있는 정보 꺼내기 -> 토큰의 전체 덩어리
     }
 
