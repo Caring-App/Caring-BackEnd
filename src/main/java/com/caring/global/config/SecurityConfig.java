@@ -20,7 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil; // JWT 필터 만들 때 필요
-    private final OAuth2SuccessHandler oAuth2SuccessHandler; // 소셜 로그인 성공 시 필요
+    // private final OAuth2SuccessHandler oAuth2SuccessHandler; // 소셜 로그인 성공 시 필요
 
     // 실제 보안 규칙을 담는 메소드
     @Bean
@@ -39,15 +39,15 @@ public class SecurityConfig {
                                 "/login/**"
                         ).permitAll() // 누구나 접근 가능
                         .anyRequest().authenticated() // 나머지는 로그인 필수
-                )
-                // 소셜 로그인 설정
-                .oauth2Login(oauth2 -> oauth2
-                        .successHandler(oAuth2SuccessHandler)
-                )
-                .addFilterBefore( // 이 필터를 앞에 끼워넣기
-                        new JwtAuthenticationFilter(jwtUtil),
-                        UsernamePasswordAuthenticationFilter.class
                 );
+                // 소셜 로그인 설정
+//                .oauth2Login(oauth2 -> oauth2
+//                        .successHandler(oAuth2SuccessHandler)
+//                )
+//                .addFilterBefore( // 이 필터를 앞에 끼워넣기
+//                        new JwtAuthenticationFilter(jwtUtil),
+//                        UsernamePasswordAuthenticationFilter.class
+//                );
 
         return http.build();
     }

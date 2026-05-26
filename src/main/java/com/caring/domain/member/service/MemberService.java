@@ -1,9 +1,6 @@
 package com.caring.domain.member.service;
 
-import com.caring.domain.member.dto.LoginRequestDto;
-import com.caring.domain.member.dto.LoginResponseDto;
-import com.caring.domain.member.dto.RegisterProtectorRequestDto;
-import com.caring.domain.member.dto.RegisterWardRequestDto;
+import com.caring.domain.member.dto.*;
 import com.caring.domain.member.entity.*;
 import com.caring.domain.member.repository.DiseaseRepository;
 import com.caring.domain.member.repository.MemberDiseaseRepository;
@@ -12,12 +9,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
 public class MemberService {
+    private final ProtectorCodeService protectorCodeService;
     private final MemberRepository memberRepository;
     private final DiseaseRepository diseaseRepository;
     private final MemberDiseaseRepository memberDiseaseRepository;
@@ -25,7 +25,7 @@ public class MemberService {
 
     // 보호자 회원가입
     @Transactional
-    public Long registerProtector(RegisterProtectorRequestDto requestDto){
+    public RegisterProtectorResponseDto registerProtector(RegisterProtectorRequestDto requestDto){
         memberRepository.findByPhone(requestDto.getPhone())
                 .ifPresent(m -> {
                     throw new IllegalArgumentException("이미 가입된 전화번호입니다.");
@@ -35,6 +35,8 @@ public class MemberService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
+        String uniqueCode = protectorCodeService.generateCode();
+
         Member newProtector = Member.builder()
                 .name(requestDto.getName())
                 .phone(requestDto.getPhone())
@@ -43,18 +45,19 @@ public class MemberService {
                 .address(requestDto.getAddress())
                 .provider(Provider.LOCAL)
                 .role(Role.PROTECTOR)
+                .protectorCode(uniqueCode)
                 .authLevel(AuthLevel.USER)
                 .build();
 
         Member savedProtector = memberRepository.save(newProtector);
 
-        return savedProtector.getMemberId();
+        return RegisterProtectorResponseDto.of(savedProtector);
     }
 
 
     // 돌봄대상자 회원가입
     @Transactional
-    public Long registerWard(RegisterWardRequestDto requestDto){
+    public RegisterWardResponseDto registerWard(RegisterWardRequestDto requestDto){
         memberRepository.findByPhone(requestDto.getPhone())
                 .ifPresent(m -> {
                     throw new IllegalArgumentException("이미 가입된 전화번호입니다.");
@@ -77,6 +80,7 @@ public class MemberService {
 
         Member savedWard = memberRepository.save(newWard);
 
+        List<String> savedDiseaseNames = new ArrayList<>();
         if(requestDto.getDiseases() != null) {
             for(String diseaseName : requestDto.getDiseases()) {
                 diseaseRepository.findByDiseaseName(diseaseName).ifPresent(disease -> {
@@ -86,11 +90,12 @@ public class MemberService {
                             .build();
 
                     memberDiseaseRepository.save(memberDisease);
+                    savedDiseaseNames.add(disease.getDiseaseName());
                 });
             }
         }
 
-        return savedWard.getMemberId();
+        return RegisterWardResponseDto.of(savedWard, savedDiseaseNames);
     }
 
 

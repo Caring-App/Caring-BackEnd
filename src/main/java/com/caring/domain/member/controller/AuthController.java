@@ -1,9 +1,6 @@
 package com.caring.domain.member.controller;
 
-import com.caring.domain.member.dto.LoginRequestDto;
-import com.caring.domain.member.dto.LoginResponseDto;
-import com.caring.domain.member.dto.RegisterProtectorRequestDto;
-import com.caring.domain.member.dto.RegisterWardRequestDto;
+import com.caring.domain.member.dto.*;
 import com.caring.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +17,9 @@ public class AuthController {
      * POST http://localhost:8080/api/auth/register/protector
      */
     @PostMapping("/register/protector")
-    public ResponseEntity<Long> registerProtector(@RequestBody RegisterProtectorRequestDto requestDto){
-        Long protectorId = memberService.registerProtector(requestDto);
-        return ResponseEntity.ok(protectorId);
+    public ResponseEntity<RegisterProtectorResponseDto> registerProtector(@RequestBody RegisterProtectorRequestDto requestDto){
+        RegisterProtectorResponseDto responseDto= memberService.registerProtector(requestDto);
+        return ResponseEntity.ok(responseDto);
     }
 
     /*
@@ -30,9 +27,9 @@ public class AuthController {
      * POST http://localhost:8080/api/auth/register/ward
      */
     @PostMapping("/register/ward")
-    public ResponseEntity<Long> registerWard(@RequestBody RegisterWardRequestDto requestDto){
-        Long wardId = memberService.registerWard(requestDto);
-        return ResponseEntity.ok(wardId);
+    public ResponseEntity<RegisterWardResponseDto> registerWard(@RequestBody RegisterWardRequestDto requestDto){
+        RegisterWardResponseDto responseDto = memberService.registerWard(requestDto);
+        return ResponseEntity.ok(responseDto);
     }
 
     /*

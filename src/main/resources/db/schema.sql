@@ -25,19 +25,19 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- Member 테이블
 -- ===========================================================
 CREATE TABLE member(
-    member_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    phone VARCHAR(20) NOT NULL UNIQUE,
-    password VARCHAR(255) NULL,
-    name VARCHAR(50) NOT NULL,
-    nickname VARCHAR(50) NULL,
-    birth_date DATE NOT NULL,
-    address VARCHAR(255) NOT NULL,
-    role ENUM('PROTECTOR', 'WARD') NOT NULL,
-    provider VARCHAR(20) NOT NULL DEFAULT 'LOCAL',
-    provider_id VARCHAR(255) NULL,
-    protector_code VARCHAR(10) NULL UNIQUE,
-    auth_level ENUM('ADMIN', 'USER') NOT NULL DEFAULT 'USER',
-    fcm_token VARCHAR(255) NULL
+                       member_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                       phone VARCHAR(20) NOT NULL UNIQUE,
+                       password VARCHAR(255) NULL,
+                       name VARCHAR(50) NOT NULL,
+                       nickname VARCHAR(50) NULL,
+                       birth_date DATE NOT NULL,
+                       address VARCHAR(255) NOT NULL,
+                       role ENUM('PROTECTOR', 'WARD') NOT NULL,
+                       provider VARCHAR(20) NOT NULL DEFAULT 'LOCAL',
+                       provider_id VARCHAR(255) NULL,
+                       protector_code VARCHAR(10) NULL UNIQUE,
+                       auth_level ENUM('ADMIN', 'USER') NOT NULL DEFAULT 'USER',
+                       fcm_token VARCHAR(255) NULL
 );
 
 -- ===========================================================
