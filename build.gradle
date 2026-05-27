@@ -32,6 +32,17 @@ dependencies {
 	testCompileOnly 'org.projectlombok:lombok'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testAnnotationProcessor 'org.projectlombok:lombok'
+
+	// Spring Security (보안 기능 전체)
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	// OAuth2 (구글/카카오 소셜 로그인)
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+	// JWT (토큰 만들고 검증하는 라이브러리)
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 }
 
 tasks.named('test') {
