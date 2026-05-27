@@ -23,15 +23,15 @@ public class ConnectionService {
 
     // 보호자와 돌봄대상자 연결하는 메소드
     @Transactional // DB 작업 오류시 롤백
-    public ConnectionResponseDto connect(Long protectorId, ConnectionRequestDto requestDto){
+    public ConnectionResponseDto connect(Long wardId, ConnectionRequestDto requestDto){
 
         // 보호자 찾기
-        Member protector = memberRepository.findById(protectorId)
-                .orElseThrow(()->new IllegalArgumentException("존재하지 않는 회원입니다."));
-
-        // 고유 코드로 대상자 찾기
-        Member ward = memberRepository.findByProtectorCode(requestDto.getWardCode())
+        Member protector = memberRepository.findByProtectorCode(requestDto.getProtectorCode())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고유 코드입니다."));
+
+        // 돌봄대상자 찾기
+        Member ward = memberRepository.findById(wardId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         // 이미 연결된 대상자인지 확인
         if (connectionRepository.existsByWard(ward)){

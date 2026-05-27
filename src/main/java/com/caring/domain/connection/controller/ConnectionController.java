@@ -20,11 +20,11 @@ public class ConnectionController {
 
     @PostMapping
     public ResponseEntity<ConnectionResponseDto> connect(
-            @AuthenticationPrincipal Long protectorId,
+            @AuthenticationPrincipal Long wardId,
             @RequestBody ConnectionRequestDto requestDto){
 
         // 서비스에게 넘겨서 보호자, 돌봄대상자 연결 처리
-        ConnectionResponseDto response = connectionService.connect(protectorId,requestDto);
+        ConnectionResponseDto response = connectionService.connect(wardId,requestDto);
         return ResponseEntity.ok(response);
     }
 }
