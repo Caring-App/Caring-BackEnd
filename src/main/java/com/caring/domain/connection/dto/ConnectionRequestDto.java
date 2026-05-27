@@ -8,5 +8,5 @@ public class ConnectionRequestDto {
     // 보호자가 고유코드를 입력할 때 필요한 dto
 
     private String wardCode; // 보호자가 입력하는 대상자 고유 코드
-    
+
 }
