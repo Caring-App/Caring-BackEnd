@@ -7,6 +7,8 @@ import com.google.firebase.messaging.Notification;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 @Slf4j // 로그 남기는 도구, 알림 내역 확인할 때 사용
 public class FcmService {
@@ -31,6 +33,23 @@ public class FcmService {
         } catch (FirebaseMessagingException e){
             log.error("FCM 알림 전송 실패 : {}", e.getMessage()); // 실패 시 에러 로그 남기기
         }
+    }
 
+
+    public void sendNotificationWithData(String fcmToken, String title, String body, Map<String, String> dataPayload) {
+        Message message = Message.builder()
+                .setToken(fcmToken)
+                .setNotification(Notification.builder()
+                        .setTitle(title)
+                        .setBody(body)
+                        .build())
+                .putAllData(dataPayload)
+                .build();
+        try {
+            String response = FirebaseMessaging.getInstance().send(message);
+            log.info("FCM 데이터 알림 전송 성공 : {}", response);
+        } catch (FirebaseMessagingException e){
+            log.error("FCM 데이터 알림 전송 실패 : {}", e.getMessage());
+        }
     }
 }
