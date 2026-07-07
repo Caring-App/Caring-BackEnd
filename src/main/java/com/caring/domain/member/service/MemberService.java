@@ -5,6 +5,7 @@ import com.caring.domain.member.entity.*;
 import com.caring.domain.member.repository.DiseaseRepository;
 import com.caring.domain.member.repository.MemberDiseaseRepository;
 import com.caring.domain.member.repository.MemberRepository;
+import com.caring.global.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ public class MemberService {
     private final DiseaseRepository diseaseRepository;
     private final MemberDiseaseRepository memberDiseaseRepository;
     private final Map<String, String> smsVerificationStorage = new ConcurrentHashMap<>();
+    private final JwtUtil jwtUtil;
 
     // 보호자 회원가입
     @Transactional
@@ -128,6 +130,7 @@ public class MemberService {
 
 
     // 로그인
+    @Transactional
     public LoginResponseDto login(LoginRequestDto requestDto){
         Member member = memberRepository.findByPhone(requestDto.getPhone())
                 .orElseThrow(() -> new IllegalArgumentException("전화번호 또는 비밀번호가 일치하지 않습니다."));
@@ -136,12 +139,17 @@ public class MemberService {
             throw new IllegalArgumentException("전화번호 또는 비밀번호가 일치하지 않습니다.");
         }
 
+        String accessToken = jwtUtil.generateAccessToken(member.getMemberId(), member.getRole().name());
+        String refreshToken = jwtUtil.generateRefreshToken(member.getMemberId(), member.getRole().name());
+
         return LoginResponseDto.builder()
                 .memberId(member.getMemberId())
                 .name(member.getName())
                 .nickname(member.getNickname())
                 .role(member.getRole())
                 .authLevel(member.getAuthLevel())
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 }

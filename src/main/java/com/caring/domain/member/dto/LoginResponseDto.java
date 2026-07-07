@@ -13,4 +13,6 @@ public class LoginResponseDto {
     private String nickname;
     private Role role;
     private AuthLevel authLevel;
+    private String accessToken;
+    private String refreshToken;
 }
