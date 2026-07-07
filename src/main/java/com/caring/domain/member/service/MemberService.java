@@ -7,6 +7,7 @@ import com.caring.domain.member.repository.MemberDiseaseRepository;
 import com.caring.domain.member.repository.MemberRepository;
 import com.caring.global.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class MemberService {
     private final DiseaseRepository diseaseRepository;
     private final MemberDiseaseRepository memberDiseaseRepository;
     private final Map<String, String> smsVerificationStorage = new ConcurrentHashMap<>();
+    private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
     // 보호자 회원가입
@@ -42,7 +44,7 @@ public class MemberService {
         Member newProtector = Member.builder()
                 .name(requestDto.getName())
                 .phone(requestDto.getPhone())
-                .password(requestDto.getPassword())
+                .password(passwordEncoder.encode(requestDto.getPassword()))
                 .birthDate(requestDto.getBirthDate())
                 .address(requestDto.getAddress())
                 .provider(Provider.LOCAL)
@@ -72,7 +74,7 @@ public class MemberService {
         Member newWard = Member.builder()
                 .name(requestDto.getName())
                 .phone(requestDto.getPhone())
-                .password(requestDto.getPassword())
+                .password(passwordEncoder.encode(requestDto.getPassword()))
                 .birthDate(requestDto.getBirthDate())
                 .address(requestDto.getAddress())
                 .provider(Provider.LOCAL)
@@ -135,7 +137,7 @@ public class MemberService {
         Member member = memberRepository.findByPhone(requestDto.getPhone())
                 .orElseThrow(() -> new IllegalArgumentException("전화번호 또는 비밀번호가 일치하지 않습니다."));
 
-        if(!member.getPassword().equals(requestDto.getPassword())){
+        if(!passwordEncoder.matches(requestDto.getPassword(), member.getPassword())) {
             throw new IllegalArgumentException("전화번호 또는 비밀번호가 일치하지 않습니다.");
         }
 
