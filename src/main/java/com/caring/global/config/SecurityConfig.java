@@ -36,18 +36,19 @@ public class SecurityConfig {
                         .requestMatchers( // 이 URL들은
                                 "/api/auth/**",
                                 "/oauth2/**",
-                                "/login/**"
+                                "/login/**",
+                                "/error"
                         ).permitAll() // 누구나 접근 가능
                         .anyRequest().authenticated() // 나머지는 로그인 필수
-                );
+                )
                 // 소셜 로그인 설정
 //                .oauth2Login(oauth2 -> oauth2
 //                        .successHandler(oAuth2SuccessHandler)
 //                )
-//                .addFilterBefore( // 이 필터를 앞에 끼워넣기
-//                        new JwtAuthenticationFilter(jwtUtil),
-//                        UsernamePasswordAuthenticationFilter.class
-//                );
+                .addFilterBefore( // 이 필터를 앞에 끼워넣기
+                        new JwtAuthenticationFilter(jwtUtil),
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }

@@ -39,7 +39,7 @@ public class AuthController {
     @PostMapping("/sms/send")
     public ResponseEntity<String> sendSms(@RequestParam("phone") String phone) {
         memberService.sendFakeSms(phone);
-        return ResponseEntity.ok("인증번호 123456이 발송되었습니다. (테스트용)");
+        return ResponseEntity.ok("인증번호가 발송되었습니다. (테스트용)");
     }
 
     /*
