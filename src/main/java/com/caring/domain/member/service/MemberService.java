@@ -201,4 +201,14 @@ public class MemberService {
                 .refreshToken(refreshToken)
                 .build();
     }
+
+
+    // FCM Token 발급
+    @Transactional
+    public void updateFcmToken(Long memberId, FcmTokenRequestDto requestDto) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        member.updateFcmToken(requestDto.getFcmToken());
+    }
 }
