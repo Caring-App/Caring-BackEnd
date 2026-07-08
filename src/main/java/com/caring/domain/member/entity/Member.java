@@ -54,4 +54,8 @@ public class Member {
 
     @Column(name = "fcm_token")
     private String fcmToken;
+
+    public void updateFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
+    }
 }
