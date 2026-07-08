@@ -11,10 +11,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
@@ -23,13 +25,40 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final DiseaseRepository diseaseRepository;
     private final MemberDiseaseRepository memberDiseaseRepository;
-    private final Map<String, String> smsVerificationStorage = new ConcurrentHashMap<>();
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final Map<String, SmsVerification> smsVerificationStorage = new ConcurrentHashMap<>();
+
+    private static class SmsVerification {
+        private final String code;
+        private final LocalDateTime expiredAt;
+        private boolean verified;
+
+        private SmsVerification(String code, LocalDateTime expiredAt) {
+            this.code = code;
+            this.expiredAt = expiredAt;
+            this.verified = false;
+        }
+
+        private boolean isExpired() {
+            return LocalDateTime.now().isAfter(expiredAt);
+        }
+    }
 
     // 보호자 회원가입
     @Transactional
     public RegisterProtectorResponseDto registerProtector(RegisterProtectorRequestDto requestDto){
+        SmsVerification verification = smsVerificationStorage.get(requestDto.getPhone());
+
+        if(verification == null
+                || !verification.verified
+                || verification.isExpired()
+                || !verification.code.equals(requestDto.getAuthNumber())){
+            throw new IllegalArgumentException("휴대폰 인증이 완료되지 않았습니다.");
+        }
+
+        smsVerificationStorage.remove(requestDto.getAuthNumber());
+
         memberRepository.findByPhone(requestDto.getPhone())
                 .ifPresent(m -> {
                     throw new IllegalArgumentException("이미 가입된 전화번호입니다.");
@@ -62,6 +91,17 @@ public class MemberService {
     // 돌봄대상자 회원가입
     @Transactional
     public RegisterWardResponseDto registerWard(RegisterWardRequestDto requestDto){
+        SmsVerification verification = smsVerificationStorage.get(requestDto.getPhone());
+
+        if(verification == null
+                || !verification.verified
+                || verification.isExpired()
+                || !verification.code.equals(requestDto.getAuthNumber())){
+            throw new IllegalArgumentException("휴대폰 인증이 완료되지 않았습니다.");
+        }
+
+        smsVerificationStorage.remove(requestDto.getAuthNumber());
+
         memberRepository.findByPhone(requestDto.getPhone())
                 .ifPresent(m -> {
                     throw new IllegalArgumentException("이미 가입된 전화번호입니다.");
@@ -105,29 +145,36 @@ public class MemberService {
 
     // 가짜 SMS 발송 및 번호 저장
     public void sendFakeSms(String phone) {
-        String fakeCode = "123456";
+        String code = String.format("%06d", ThreadLocalRandom.current().nextInt(0, 1_000_000));
+        LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(3);
 
-        smsVerificationStorage.put(phone, fakeCode);
+        smsVerificationStorage.put(phone, new SmsVerification(code, expiredAt));
+
         System.out.println("────── [SMS 발송 로그] ──────");
-        System.out.println("수신번호: " + phone + " | 인증번호: " + fakeCode);
+        System.out.println("수신번호: " + phone + " | 인증번호: " + code + " | 만료: " + expiredAt);
         System.out.println("───────────────────────────");
     }
 
 
     // 사용자가 입력한 인증번호 검증
     public boolean verifySmsCode(String phone, String code) {
-        String realCode = smsVerificationStorage.get(phone);
+        SmsVerification verification = smsVerificationStorage.get(phone);
 
-        if(realCode == null) {
+        if(verification == null) {
             return false;
         }
 
-        if(realCode.equals(code)) {
+        if(verification.isExpired()) {
             smsVerificationStorage.remove(phone);
-            return true;
+            return false;
         }
 
-        return false;
+        if(!verification.code.equals(code)) {
+            return false;
+        }
+
+        verification.verified = true;
+        return true;
     }
 
 
