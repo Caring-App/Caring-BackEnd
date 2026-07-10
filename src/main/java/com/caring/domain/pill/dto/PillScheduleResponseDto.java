@@ -10,7 +10,7 @@ import java.time.LocalTime;
 @Getter
 public class PillScheduleResponseDto {
     private final Long pillScheduleId;
-    private final Long memberId;
+    private final Long wardId;
     private final String wardName;
     private final PillType pillName;
     private final String pillNameKr;
@@ -23,8 +23,8 @@ public class PillScheduleResponseDto {
 
     public PillScheduleResponseDto(PillSchedule entity) {
         this.pillScheduleId = entity.getPillScheduleId();
-        this.memberId = entity.getMember().getMemberId();
-        this.wardName = entity.getMember().getName();
+        this.wardId = entity.getWard().getMemberId();
+        this.wardName = entity.getWard().getName();
         this.pillName = entity.getPillName();
         this.pillNameKr = entity.getPillName().getDescription();
         this.takeDays = entity.getTakeDays();

@@ -22,9 +22,9 @@ public class PillScheduleController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @GetMapping("/schedule/{memberId}")
-    public ResponseEntity<List<PillScheduleResponseDto>> getScheduleByWard(@PathVariable("memberId") Long memberId) {
-        List<PillScheduleResponseDto> responseList = pillScheduleService.getSchedulesByWard(memberId);
+    @GetMapping("/schedule/{wardId}")
+    public ResponseEntity<List<PillScheduleResponseDto>> getScheduleByWard(@PathVariable("wardId") Long wardId) {
+        List<PillScheduleResponseDto> responseList = pillScheduleService.getSchedulesByWard(wardId);
         return ResponseEntity.ok(responseList);
     }
 

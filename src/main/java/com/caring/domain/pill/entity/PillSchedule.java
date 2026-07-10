@@ -19,8 +19,8 @@ public class PillSchedule {
     private Long pillScheduleId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @JoinColumn(name = "ward_id", nullable = false)
+    private Member ward;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "pill_name", length = 100, nullable = false)
