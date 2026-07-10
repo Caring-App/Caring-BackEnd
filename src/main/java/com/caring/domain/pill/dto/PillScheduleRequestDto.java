@@ -11,7 +11,7 @@ import java.time.LocalTime;
 @Getter
 @NoArgsConstructor
 public class PillScheduleRequestDto {
-    private Long memberId;
+    private Long wardId;
     private PillType pillName;
     private String takeDays;
     private LocalTime takeTime;

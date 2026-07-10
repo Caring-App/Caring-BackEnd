@@ -25,11 +25,11 @@ public class PillScheduleService {
     // 복약 일정 등록
     @Transactional
     public PillScheduleResponseDto createSchedule(PillScheduleRequestDto requestDto) {
-        Member ward = memberRepository.findById(requestDto.getMemberId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 돌봄대상자가 존재하지 않습니다. ID = " + requestDto.getMemberId()));
+        Member ward = memberRepository.findById(requestDto.getWardId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 돌봄대상자가 존재하지 않습니다. ID = " + requestDto.getWardId()));
 
         PillSchedule pillSchedule = PillSchedule.builder()
-                .member(ward)
+                .ward(ward)
                 .pillName(requestDto.getPillName())
                 .takeDays(requestDto.getTakeDays())
                 .takeTime(requestDto.getTakeTime())
@@ -45,8 +45,8 @@ public class PillScheduleService {
 
 
     // 돌봄 대상자의 복약 일정 리스트 조회
-    public List<PillScheduleResponseDto> getSchedulesByWard(Long memberId) {
-        return pillScheduleRepository.findByMemberMemberId(memberId).stream()
+    public List<PillScheduleResponseDto> getSchedulesByWard(Long wardId) {
+        return pillScheduleRepository.findByWardMemberId(wardId).stream()
                 .map(PillScheduleResponseDto::new)
                 .collect(Collectors.toList());
     }

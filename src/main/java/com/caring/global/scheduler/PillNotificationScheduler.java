@@ -37,8 +37,8 @@ public class PillNotificationScheduler {
             String takeDays = schedule.getTakeDays();
 
             if (takeDays.equals("EVERYDAY") || takeDays.contains(todayKr)) {
-                String fcmToken = schedule.getMember().getFcmToken();
-                String wardName = schedule.getMember().getName();
+                String fcmToken = schedule.getWard().getFcmToken();
+                String wardName = schedule.getWard().getName();
                 String pillLabel = schedule.getPillName().getDescription();
 
                 if (fcmToken != null && !fcmToken.isBlank()) {
@@ -54,7 +54,7 @@ public class PillNotificationScheduler {
                     try {
                         fcmService.sendNotificationWithData(fcmToken, title, body, dataPayload);
                     } catch (Exception e) {
-                        log.error("[FCM 발송 실패] 대상자 ID: {}, 에러: {}", schedule.getMember().getMemberId(), e.getMessage());
+                        log.error("[FCM 발송 실패] 대상자 ID: {}, 에러: {}", schedule.getWard().getMemberId(), e.getMessage());
                     }
                 } else {
                     log.warn("[FCM 발송 패스] 대상자 {}의 FCM 토큰이 존재하지 않습니다.", wardName);

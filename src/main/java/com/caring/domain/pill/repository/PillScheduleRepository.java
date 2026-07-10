@@ -11,8 +11,8 @@ import java.util.List;
 
 @Repository
 public interface PillScheduleRepository extends JpaRepository<PillSchedule, Long> {
-    List<PillSchedule> findByMemberMemberId(Long memberId);
+    List<PillSchedule> findByWardMemberId(Long wardId);
 
-    @Query("SELECT p FROM PillSchedule p JOIN FETCH p.member WHERE p.isActive = true AND p.takeTime = :takeTime")
+    @Query("SELECT p FROM PillSchedule p JOIN FETCH p.ward WHERE p.isActive = true AND p.takeTime = :takeTime")
     List<PillSchedule> findActiveSchedulesByTime(@Param("takeTime") LocalTime takeTime);
 }
