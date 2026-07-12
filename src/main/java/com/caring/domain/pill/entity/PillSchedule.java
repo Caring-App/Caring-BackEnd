@@ -1,6 +1,7 @@
 package com.caring.domain.pill.entity;
 
 import com.caring.domain.member.entity.Member;
+import com.caring.global.common.AlarmType;
 import jakarta.persistence.*;
 import lombok.*;
 

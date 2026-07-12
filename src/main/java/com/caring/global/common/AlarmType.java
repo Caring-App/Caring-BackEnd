@@ -1,4 +1,4 @@
-package com.caring.domain.pill.entity;
+package com.caring.global.common;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
