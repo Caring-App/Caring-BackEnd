@@ -205,6 +205,76 @@ public class MemberService {
                 .build();
     }
 
+    // 소셜 회원가입
+    @Transactional
+    public SocialRegisterResponseDto socialRegister(SocialRegisterRequestDto requestDto){
+
+        // 1. 이미 가입된 소셜 계정인지 확인
+        memberRepository.findByProviderAndProviderId(requestDto.getProvider(),requestDto.getProviderId())
+                .ifPresent(m->{
+                    throw new IllegalArgumentException("이미 가입된 계정입니다.");
+                });
+
+        //2. 전화번호 중복 확인
+        memberRepository.findByPhone(requestDto.getPhone())
+                .ifPresent(m->{
+                    throw new IllegalArgumentException("이미 가입된 전화번호입니다.");
+                });
+
+        //3. protectorCode는 보호자일때만 생성
+        String protectorCode = null;
+        if (requestDto.getRole()==Role.PROTECTOR){
+            protectorCode = protectorCodeService.generateCode();
+        }
+
+        //4. member 저장 ( 비밀번호는 없으니까 그냥 null로 남기기 )
+        Member newmember = Member.builder()
+                .provider(requestDto.getProvider())
+                .providerId(requestDto.getProviderId())
+                .role(requestDto.getRole())
+                .name(requestDto.getName())
+                .phone(requestDto.getPhone())
+                .birthDate(requestDto.getBirthDate())
+                .address(requestDto.getAddress())
+                .protectorCode(protectorCode)
+                .authLevel(AuthLevel.USER)
+                .build();
+
+        Member savedMember = memberRepository.save(newmember);
+
+        //5. 돌봄대상자라면 질병 저장
+        List<String> savedDiseaseNames = new ArrayList<>();
+        if(requestDto.getDiseases() != null) {
+            for(String diseaseName : requestDto.getDiseases()) {
+                diseaseRepository.findByDiseaseName(diseaseName).ifPresent(disease -> {
+                            MemberDisease memberDisease = MemberDisease.builder()
+                                    .ward(savedMember)
+                                    .disease(disease)
+                                    .build();
+
+                            memberDiseaseRepository.save(memberDisease);
+                            savedDiseaseNames.add(disease.getDiseaseName());
+                });
+            }
+        }
+        //6. JWT 발급
+        String accessToken = jwtUtil.generateAccessToken(savedMember.getMemberId(), savedMember.getRole().name());
+        String refreshToken = jwtUtil.generateRefreshToken(savedMember.getMemberId(), savedMember.getRole().name());
+
+        // 7. 응답 조합
+        return SocialRegisterResponseDto.builder()
+                .memberId(savedMember.getMemberId())
+                .name(savedMember.getName())
+                .phone(savedMember.getPhone())
+                .role(savedMember.getRole())
+                .protectorCode(protectorCode)
+                .diseases(savedDiseaseNames)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+
+    }
+
     // 소셜 로그인
     @Transactional
     public SocialLoginResponseDto socialLogin(Provider provider, SocialLoginRequestDto requestDto){
