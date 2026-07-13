@@ -40,4 +40,15 @@ public class PillLog {
         this.isTaken=true;
         this.confirmedAt=LocalDateTime.now();
     }
+
+    public void increaseRetryCount() {
+        this.currentRetryCount+=1;
+    }
+
+    public void escalate() {
+        this.currentRetryCount = ESCALATED;
+    }
+    
+    public static final int ESCALATED = 4;
+
 }
