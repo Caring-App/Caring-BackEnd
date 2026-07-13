@@ -48,7 +48,7 @@ public class PillLog {
     public void escalate() {
         this.currentRetryCount = ESCALATED;
     }
-    
+
     public static final int ESCALATED = 4;
 
 }
