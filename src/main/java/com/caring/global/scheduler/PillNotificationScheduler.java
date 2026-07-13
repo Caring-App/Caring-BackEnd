@@ -1,6 +1,8 @@
 package com.caring.global.scheduler;
 
+import com.caring.domain.pill.entity.PillLog;
 import com.caring.domain.pill.entity.PillSchedule;
+import com.caring.domain.pill.repository.PillLogRepository;
 import com.caring.domain.pill.repository.PillScheduleRepository;
 import com.caring.domain.notification.service.FcmService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class PillNotificationScheduler {
 
     private final PillScheduleRepository pillScheduleRepository;
     private final FcmService fcmService;
+    private final PillLogRepository pillLogRepository;
 
     @Scheduled(cron = "0 * * * * *")
     public void checkAndSendPillNotifications() {
@@ -37,6 +40,14 @@ public class PillNotificationScheduler {
             String takeDays = schedule.getTakeDays();
 
             if (takeDays.equals("EVERYDAY") || takeDays.contains(todayKr)) {
+
+                PillLog pillLog = pillLogRepository.findByPillScheduleAndRecordDate(schedule,LocalDate.now())
+                        .orElseGet(()->pillLogRepository.save(
+                                PillLog.builder()
+                                .pillSchedule(schedule)
+                                .recordDate(LocalDate.now())
+                                .build()));
+
                 String fcmToken = schedule.getWard().getFcmToken();
                 String wardName = schedule.getWard().getName();
                 String pillLabel = schedule.getPillName().getDescription();
@@ -50,6 +61,8 @@ public class PillNotificationScheduler {
                     Map<String, String> dataPayload = new HashMap<>();
                     dataPayload.put("alarmType", schedule.getAlarmType().name());
                     dataPayload.put("voiceFileUrl", schedule.getVoiceFileUrl() != null ? schedule.getVoiceFileUrl() : "");
+
+                    dataPayload.put("pillLogId", pillLog.getPillLogId().toString());
 
                     try {
                         fcmService.sendNotificationWithData(fcmToken, title, body, dataPayload);
