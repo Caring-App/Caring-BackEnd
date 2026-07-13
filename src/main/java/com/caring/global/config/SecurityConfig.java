@@ -34,7 +34,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers( // 이 URL들은
                                 "/api/auth/**",
-                                "/error"
+                                "/error",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**"
                         ).permitAll() // 누구나 접근 가능
                         .anyRequest().authenticated() // 나머지는 로그인 필수
                 )

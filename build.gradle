@@ -46,6 +46,9 @@ dependencies {
 
 	// Firebase Admin SDK (FCM 서버에서 푸시 알림 보내기)
 	implementation 'com.google.firebase:firebase-admin:9.2.0'
+
+	// Swagger (springdoc-openapi)
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
 }
 
 tasks.named('test') {
