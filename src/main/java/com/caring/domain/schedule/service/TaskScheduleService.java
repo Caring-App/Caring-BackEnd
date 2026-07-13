@@ -35,6 +35,7 @@ public class TaskScheduleService {
                 .ttsMessage(requestDto.getTtsMessage())
                 .alarmType(requestDto.getAlarmType())
                 .voiceFileUrl(requestDto.getVoiceFileUrl())
+                .placeId(requestDto.getPlaceId())
                 .build();
 
         return new TaskScheduleResponseDto(taskScheduleRepository.save(taskSchedule));
@@ -64,7 +65,8 @@ public class TaskScheduleService {
                 requestDto.getTtsVoiceTime(),
                 requestDto.getTtsMessage(),
                 requestDto.getAlarmType(),
-                requestDto.getVoiceFileUrl()
+                requestDto.getVoiceFileUrl(),
+                requestDto.getPlaceId()
         );
 
         return new TaskScheduleResponseDto(taskSchedule);

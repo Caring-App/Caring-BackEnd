@@ -95,7 +95,9 @@ CREATE TABLE task_schedule (
                                tts_message      TEXT NULL,
                                alarm_type       VARCHAR(50) NOT NULL DEFAULT 'TTS',
                                voice_file_url   VARCHAR(500) NULL,
-                               FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE
+                               place_id         BIGINT NULL,
+                               FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE,
+                               FOREIGN KEY (place_id) REFERENCES place_info(place_id) ON DELETE SET NULL
 );
 
 -- ===========================================================

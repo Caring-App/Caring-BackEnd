@@ -49,6 +49,9 @@ public class TaskSchedule {
     @Column(name = "voice_file_url", length = 500)
     private String voiceFileUrl;
 
+    @Column(name = "place_id")
+    private Long placeId;
+
     public void updateTask(String taskName,
                            String locationName,
                            LocalDate taskDate,
@@ -56,7 +59,8 @@ public class TaskSchedule {
                            LocalTime ttsVoiceTime,
                            String ttsMessage,
                            AlarmType alarmType,
-                           String voiceFileUrl) {
+                           String voiceFileUrl,
+                           Long placeId) {
         this.taskName = taskName;
         this.locationName = locationName;
         this.taskDate = taskDate;
@@ -65,5 +69,6 @@ public class TaskSchedule {
         this.ttsMessage = ttsMessage;
         this.alarmType = alarmType;
         this.voiceFileUrl = voiceFileUrl;
+        this.placeId = placeId;
     }
 }

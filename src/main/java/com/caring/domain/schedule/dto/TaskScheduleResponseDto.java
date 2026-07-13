@@ -18,6 +18,7 @@ public class TaskScheduleResponseDto {
     private final String ttsMessage;
     private final AlarmType alarmType;
     private final String voiceFileUrl;
+    private Long placeId;
 
     public TaskScheduleResponseDto(TaskSchedule entity) {
         this.taskId = entity.getTaskId();
@@ -29,5 +30,6 @@ public class TaskScheduleResponseDto {
         this.ttsMessage = entity.getTtsMessage();
         this.alarmType = entity.getAlarmType();
         this.voiceFileUrl = entity.getVoiceFileUrl();
+        this.placeId = entity.getPlaceId();
     }
 }

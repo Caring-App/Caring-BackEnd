@@ -18,4 +18,5 @@ public class TaskScheduleRequestDto {
     private String ttsMessage;
     private AlarmType alarmType;
     private String voiceFileUrl;
+    private Long placeId;
 }
