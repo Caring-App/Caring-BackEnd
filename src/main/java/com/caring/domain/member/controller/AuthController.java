@@ -1,6 +1,7 @@
 package com.caring.domain.member.controller;
 
 import com.caring.domain.member.dto.*;
+import com.caring.domain.member.entity.Provider;
 import com.caring.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -66,4 +67,18 @@ public class AuthController {
         LoginResponseDto responseDto = memberService.login(requestDto);
         return ResponseEntity.ok(responseDto);
     }
+
+    /*
+     * 소셜 로그인
+     * POST http://localhost:8080/api/auth/{provider}
+     * 예: POST /api/auth/kakao
+     */
+    @PostMapping("/{provider}")
+    public ResponseEntity<SocialLoginResponseDto> socialLogin(
+            @PathVariable("provider")Provider provider, // // URL의 {provider} 부분을 자동으로 Provider enum으로 변환해줌
+            @RequestBody SocialLoginRequestDto requestDto){
+        SocialLoginResponseDto responseDto = memberService.socialLogin(provider,requestDto);
+        return ResponseEntity.ok(responseDto);
+    }
+
 }
