@@ -35,4 +35,9 @@ public class PillLog {
     @Builder.Default
     @Column(name = "current_retry_count")
     private Integer currentRetryCount = 0;
+
+    public void confirm(){
+        this.isTaken=true;
+        this.confirmedAt=LocalDateTime.now();
+    }
 }
