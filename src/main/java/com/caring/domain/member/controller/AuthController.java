@@ -75,8 +75,10 @@ public class AuthController {
      */
     @PostMapping("/{provider}")
     public ResponseEntity<SocialLoginResponseDto> socialLogin(
-            @PathVariable("provider")Provider provider, // // URL의 {provider} 부분을 자동으로 Provider enum으로 변환해줌
+            @PathVariable("provider")String providerParam, // URL의 {provider} 부분을 문자열로 받음 (아래에서 직접 Provider enum으로 변환)
             @RequestBody SocialLoginRequestDto requestDto){
+
+        Provider provider = Provider.valueOf(providerParam.toUpperCase());
         SocialLoginResponseDto responseDto = memberService.socialLogin(provider,requestDto);
         return ResponseEntity.ok(responseDto);
     }
