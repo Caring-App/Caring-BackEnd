@@ -83,4 +83,14 @@ public class AuthController {
         return ResponseEntity.ok(responseDto);
     }
 
+    /*
+     * 소셜 회원가입
+     * POST http://localhost:8080/api/auth/register/social
+     */
+    @PostMapping("/register/social")
+    public ResponseEntity<SocialRegisterResponseDto> socialRegister(@RequestBody SocialRegisterRequestDto requestDto) {
+        SocialRegisterResponseDto responseDto = memberService.socialRegister(requestDto);
+        return ResponseEntity.ok(responseDto);
+    }
+
 }
