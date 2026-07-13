@@ -1,6 +1,6 @@
 package com.caring.domain.pill.dto;
 
-import com.caring.domain.pill.entity.AlarmType;
+import com.caring.global.common.AlarmType;
 import com.caring.domain.pill.entity.PillSchedule;
 import com.caring.domain.pill.entity.PillType;
 import lombok.Getter;
