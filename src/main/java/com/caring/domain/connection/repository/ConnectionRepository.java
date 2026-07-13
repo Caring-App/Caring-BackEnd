@@ -5,6 +5,7 @@ import com.caring.domain.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ConnectionRepository extends JpaRepository<Connection, Long> {
 
@@ -13,4 +14,7 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
 
     // 보호자와의 연결 목록 조회
     List<Connection> findByProtector(Member protector);
+
+    // 대상자로 연결된 보호자 찾기 ( 미응답 알림 발송용 )
+    Optional<Connection> findByWard(Member ward);
 }
