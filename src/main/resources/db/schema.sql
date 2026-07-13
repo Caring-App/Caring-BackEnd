@@ -156,6 +156,7 @@ CREATE TABLE location_log (
                               longitude            DOUBLE NOT NULL,
                               stay_duration        INT NOT NULL DEFAULT 0,
                               is_visit_verified    BOOLEAN NOT NULL DEFAULT FALSE,
+                              recorded_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                               FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE
 );
 
