@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -28,6 +29,8 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final Map<String, SmsVerification> smsVerificationStorage = new ConcurrentHashMap<>();
+    private final SocialLoginService socialLoginService;
+
 
     private static class SmsVerification {
         private final String code;
@@ -200,6 +203,45 @@ public class MemberService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    // 소셜 로그인
+    @Transactional
+    public SocialLoginResponseDto socialLogin(Provider provider, SocialLoginRequestDto requestDto){
+
+        //1. 소셜 로그인에서 사용자 정보 받아오기
+        SocialUserInfo socialUserInfo = socialLoginService.getSocialUserInfo(provider, requestDto.getAccessToken());
+
+        //2. 이미 가입한 회원인지 조회
+        Optional<Member> existingMember = memberRepository.findByProviderAndProviderId(provider, socialUserInfo.getProviderId());
+
+        //3. 있으면 로그인 처리
+        if (existingMember.isPresent()){
+            Member member = existingMember.get(); // Optional 안에서 진짜 Member 꺼내기
+
+            String accessToken = jwtUtil.generateAccessToken(member.getMemberId(), member.getRole().name());
+            String refreshToken = jwtUtil.generateRefreshToken(member.getMemberId(), member.getRole().name());
+
+            return
+                    SocialLoginResponseDto.builder()
+                    .isNewMember(false)
+                    .memberId(member.getMemberId())
+                    .name(member.getName())
+                    .nickname(member.getNickname())
+                    .role(member.getRole())
+                    .authLevel(member.getAuthLevel())
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .build();
+        } else {
+            // 없으면 신규 회원으로 응답
+            return SocialLoginResponseDto.builder()
+                    .isNewMember(true)
+                    .provider(socialUserInfo.getProvider())
+                    .providerId(socialUserInfo.getProviderId())
+                    .role(requestDto.getRole())
+                    .build();
+        }
     }
 
 
