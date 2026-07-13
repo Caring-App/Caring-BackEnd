@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -28,6 +29,8 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final Map<String, SmsVerification> smsVerificationStorage = new ConcurrentHashMap<>();
+    private final SocialLoginService socialLoginService;
+
 
     private static class SmsVerification {
         private final String code;
@@ -200,6 +203,115 @@ public class MemberService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    // 소셜 회원가입
+    @Transactional
+    public SocialRegisterResponseDto socialRegister(SocialRegisterRequestDto requestDto){
+
+        // 1. 이미 가입된 소셜 계정인지 확인
+        memberRepository.findByProviderAndProviderId(requestDto.getProvider(),requestDto.getProviderId())
+                .ifPresent(m->{
+                    throw new IllegalArgumentException("이미 가입된 계정입니다.");
+                });
+
+        //2. 전화번호 중복 확인
+        memberRepository.findByPhone(requestDto.getPhone())
+                .ifPresent(m->{
+                    throw new IllegalArgumentException("이미 가입된 전화번호입니다.");
+                });
+
+        //3. protectorCode는 보호자일때만 생성
+        String protectorCode = null;
+        if (requestDto.getRole()==Role.PROTECTOR){
+            protectorCode = protectorCodeService.generateCode();
+        }
+
+        //4. member 저장 ( 비밀번호는 없으니까 그냥 null로 남기기 )
+        Member newmember = Member.builder()
+                .provider(requestDto.getProvider())
+                .providerId(requestDto.getProviderId())
+                .role(requestDto.getRole())
+                .name(requestDto.getName())
+                .phone(requestDto.getPhone())
+                .birthDate(requestDto.getBirthDate())
+                .address(requestDto.getAddress())
+                .protectorCode(protectorCode)
+                .authLevel(AuthLevel.USER)
+                .build();
+
+        Member savedMember = memberRepository.save(newmember);
+
+        //5. 돌봄대상자라면 질병 저장
+        List<String> savedDiseaseNames = new ArrayList<>();
+        if(requestDto.getDiseases() != null) {
+            for(String diseaseName : requestDto.getDiseases()) {
+                diseaseRepository.findByDiseaseName(diseaseName).ifPresent(disease -> {
+                            MemberDisease memberDisease = MemberDisease.builder()
+                                    .ward(savedMember)
+                                    .disease(disease)
+                                    .build();
+
+                            memberDiseaseRepository.save(memberDisease);
+                            savedDiseaseNames.add(disease.getDiseaseName());
+                });
+            }
+        }
+        //6. JWT 발급
+        String accessToken = jwtUtil.generateAccessToken(savedMember.getMemberId(), savedMember.getRole().name());
+        String refreshToken = jwtUtil.generateRefreshToken(savedMember.getMemberId(), savedMember.getRole().name());
+
+        // 7. 응답 조합
+        return SocialRegisterResponseDto.builder()
+                .memberId(savedMember.getMemberId())
+                .name(savedMember.getName())
+                .phone(savedMember.getPhone())
+                .role(savedMember.getRole())
+                .protectorCode(protectorCode)
+                .diseases(savedDiseaseNames)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+
+    }
+
+    // 소셜 로그인
+    @Transactional
+    public SocialLoginResponseDto socialLogin(Provider provider, SocialLoginRequestDto requestDto){
+
+        //1. 소셜 로그인에서 사용자 정보 받아오기
+        SocialUserInfo socialUserInfo = socialLoginService.getSocialUserInfo(provider, requestDto.getAccessToken());
+
+        //2. 이미 가입한 회원인지 조회
+        Optional<Member> existingMember = memberRepository.findByProviderAndProviderId(provider, socialUserInfo.getProviderId());
+
+        //3. 있으면 로그인 처리
+        if (existingMember.isPresent()){
+            Member member = existingMember.get(); // Optional 안에서 진짜 Member 꺼내기
+
+            String accessToken = jwtUtil.generateAccessToken(member.getMemberId(), member.getRole().name());
+            String refreshToken = jwtUtil.generateRefreshToken(member.getMemberId(), member.getRole().name());
+
+            return
+                    SocialLoginResponseDto.builder()
+                    .isNewMember(false)
+                    .memberId(member.getMemberId())
+                    .name(member.getName())
+                    .nickname(member.getNickname())
+                    .role(member.getRole())
+                    .authLevel(member.getAuthLevel())
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .build();
+        } else {
+            // 없으면 신규 회원으로 응답
+            return SocialLoginResponseDto.builder()
+                    .isNewMember(true)
+                    .provider(socialUserInfo.getProvider())
+                    .providerId(socialUserInfo.getProviderId())
+                    .role(requestDto.getRole())
+                    .build();
+        }
     }
 
 
