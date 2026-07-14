@@ -344,6 +344,37 @@ public class MemberService {
         }
     }
 
+    // 비밀번호 재설정
+    @Transactional
+    public void resetPassword(PasswordResetRequestDto requestDto){
+
+        // 1.SMS 인증 검증
+        SmsVerification verification = smsVerificationStorage.get(requestDto.getPhone());
+
+        if(verification == null
+                || !verification.verified
+                || verification.isExpired()
+                || !verification.code.equals(requestDto.getAuthNumber())){
+            throw new IllegalArgumentException("휴대폰 인증이 완료되지 않았습니다.");
+        }
+
+        // 2. 인증 정보 제거
+        smsVerificationStorage.remove(requestDto.getPhone());
+
+        // 3. newpassword와 newpasswordcheck 일치 확인
+        if (!requestDto.getNewPassword().equals(requestDto.getNewPasswordCheck())) {
+            throw new IllegalArgumentException("비밀번호가 같지 않습니다.");
+        }
+
+        // 4.phone으로 회원 조회
+        String phone= requestDto.getPhone();
+        Member member = memberRepository.findByPhone(phone)
+                .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 전화번호입니다."));
+
+        // 5. 새 비밀번호 암호화해서 업데이트 메소드 호출
+        String encodedPassword = passwordEncoder.encode(requestDto.getNewPassword());
+        member.updatePassword(encodedPassword);    }
+
 
     // FCM Token 발급
     @Transactional
