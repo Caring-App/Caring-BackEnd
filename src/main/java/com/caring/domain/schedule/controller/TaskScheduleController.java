@@ -21,31 +21,36 @@ public class TaskScheduleController {
 
     @PostMapping
     public ResponseEntity<TaskScheduleResponseDto> createTask(
-            @AuthenticationPrincipal Long wardId,
+            @AuthenticationPrincipal Long protectorId,
+            @RequestParam Long wardId,
             @RequestBody TaskScheduleRequestDto requestDto
     ) {
-        return ResponseEntity.ok(taskScheduleService.createTask(wardId, requestDto));
+        return ResponseEntity.ok(taskScheduleService.createTask(protectorId, wardId, requestDto));
     }
 
     @GetMapping
     public ResponseEntity<List<TaskScheduleResponseDto>> getTasks(
-            @AuthenticationPrincipal Long wardId,
+            @AuthenticationPrincipal Long protectorId,
+            @RequestParam Long wardId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
-        return ResponseEntity.ok(taskScheduleService.getTasksByDate(wardId, date));
+        return ResponseEntity.ok(taskScheduleService.getTasksByDate(protectorId, wardId, date));
     }
 
     @PatchMapping("/{taskId}")
     public ResponseEntity<TaskScheduleResponseDto> updateTask(
+            @AuthenticationPrincipal Long protectorId,
             @PathVariable Long taskId,
             @RequestBody TaskScheduleRequestDto requestDto
     ) {
-        return ResponseEntity.ok(taskScheduleService.updateTask(taskId, requestDto));
+        return ResponseEntity.ok(taskScheduleService.updateTask(protectorId, taskId, requestDto));
     }
 
     @DeleteMapping("/{taskId}")
-    public ResponseEntity<Void> deleteTask(@PathVariable Long taskId) {
-        taskScheduleService.deleteTask(taskId);
+    public ResponseEntity<Void> deleteTask(
+            @AuthenticationPrincipal Long protectorId,
+            @PathVariable Long taskId) {
+        taskScheduleService.deleteTask(protectorId, taskId);
         return ResponseEntity.noContent().build();
     }
 }
