@@ -82,6 +82,18 @@ CREATE TABLE pill_log (
 );
 
 -- ===========================================================
+-- Place_info 테이블
+-- ===========================================================
+CREATE TABLE place_info (
+                            place_id     BIGINT AUTO_INCREMENT PRIMARY KEY,
+                            ward_id      BIGINT NOT NULL,
+                            place_name   VARCHAR(100) NOT NULL,
+                            latitude     DOUBLE NOT NULL,
+                            longitude    DOUBLE NOT NULL,
+                            FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE
+);
+
+-- ===========================================================
 -- Task_Schedule 테이블
 -- ===========================================================
 CREATE TABLE task_schedule (
@@ -98,18 +110,6 @@ CREATE TABLE task_schedule (
                                place_id         BIGINT NULL,
                                FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE,
                                FOREIGN KEY (place_id) REFERENCES place_info(place_id) ON DELETE SET NULL
-);
-
--- ===========================================================
--- Place_info 테이블
--- ===========================================================
-CREATE TABLE place_info (
-                            place_id     BIGINT AUTO_INCREMENT PRIMARY KEY,
-                            ward_id      BIGINT NOT NULL,
-                            place_name   VARCHAR(100) NOT NULL,
-                            latitude     DOUBLE NOT NULL,
-                            longitude    DOUBLE NOT NULL,
-                            FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE
 );
 
 -- ===========================================================
