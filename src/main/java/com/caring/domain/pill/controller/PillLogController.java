@@ -5,6 +5,7 @@ import com.caring.domain.pill.dto.PillLogResponseDto;
 import com.caring.domain.pill.service.PillLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,9 +23,11 @@ public class PillLogController {
      * POST http://localhost:8080/api/pill/confirm
      */
     @PostMapping("/confirm")
-    public ResponseEntity<PillLogResponseDto> confirmPill(@RequestBody PillConfirmRequestDto requestDto) {
+    public ResponseEntity<PillLogResponseDto> confirmPill(
+            @AuthenticationPrincipal Long wardId,
+            @RequestBody PillConfirmRequestDto requestDto) {
         // pillLogService.confirmPill() 호출
-        PillLogResponseDto responseDto = pillLogService.confirmPill(requestDto.getPillLogId());
+        PillLogResponseDto responseDto = pillLogService.confirmPill(wardId, requestDto.getPillLogId());
 
         return ResponseEntity.ok().body(responseDto);
     }
