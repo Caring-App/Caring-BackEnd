@@ -14,6 +14,16 @@ public class AuthController {
     private final MemberService memberService;
 
     /*
+     * Access Token 재발급
+     * POST http://localhost:8080/api/auth/refresh
+     */
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshTokenResponseDto> refresh(@RequestBody RefreshTokenRequestDto requestDto) {
+        RefreshTokenResponseDto responseDto = memberService.reissueAccessToken(requestDto);
+        return ResponseEntity.ok().body(responseDto);
+    }
+
+    /*
      * 보호자 회원가입
      * POST http://localhost:8080/api/auth/register/protector
      */
