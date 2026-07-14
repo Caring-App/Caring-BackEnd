@@ -48,6 +48,36 @@ public class MemberService {
         }
     }
 
+    // refreshToken 재발급
+    @Transactional(readOnly = true)
+    public RefreshTokenResponseDto reissueAccessToken(RefreshTokenRequestDto requestDto){
+
+        String refreshToken = requestDto.getRefreshToken();
+
+        // 1. 토큰 유효성 검증
+        if (!jwtUtil.validateToken(refreshToken)){
+            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+        }
+
+        // 2. 토큰 타입이 refresh인지 확인
+        if (!jwtUtil.getTokenType(refreshToken).equals("REFRESH")){
+            throw new IllegalArgumentException("Refresh Token이 아닙니다.");
+        }
+
+        // 3. 토큰에서 memberId 꺼내서 아직 존재하는 회원인지 확인
+        Long memberId = jwtUtil.getMemberId(refreshToken);
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(()-> new IllegalArgumentException("존재하는 회원이 아닙니다."));
+
+        // 4. 새 accessToken 발급
+        String newAccessToken = jwtUtil.generateAccessToken(member.getMemberId(),member.getRole().name());
+
+        // 5. 반환
+        return RefreshTokenResponseDto.builder()
+                .accessToken(newAccessToken)
+                .build();
+    }
+
     // 보호자 회원가입
     @Transactional
     public RegisterProtectorResponseDto registerProtector(RegisterProtectorRequestDto requestDto){
