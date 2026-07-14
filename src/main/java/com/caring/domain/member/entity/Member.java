@@ -58,4 +58,6 @@ public class Member {
     public void updateFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
     }
+
+    public void updatePassword(String password){ this.password =password; }
 }

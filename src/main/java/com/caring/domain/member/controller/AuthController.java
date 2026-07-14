@@ -103,4 +103,13 @@ public class AuthController {
         return ResponseEntity.ok(responseDto);
     }
 
+    /*
+     * 비밀번호 재설정
+     * POST http://localhost:8080/api/auth/password/reset
+     */
+    @PostMapping("/password/reset")
+    public ResponseEntity<String> resetPassword(@RequestBody PasswordResetRequestDto requestDto) {
+        memberService.resetPassword(requestDto);
+        return ResponseEntity.ok("비밀번호가 변경되었습니다.");
+    }
 }
