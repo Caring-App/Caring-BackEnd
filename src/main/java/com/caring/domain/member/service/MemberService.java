@@ -90,7 +90,7 @@ public class MemberService {
             throw new IllegalArgumentException("휴대폰 인증이 완료되지 않았습니다.");
         }
 
-        smsVerificationStorage.remove(requestDto.getAuthNumber());
+        smsVerificationStorage.remove(requestDto.getPhone());
 
         memberRepository.findByPhone(requestDto.getPhone())
                 .ifPresent(m -> {
@@ -133,7 +133,7 @@ public class MemberService {
             throw new IllegalArgumentException("휴대폰 인증이 완료되지 않았습니다.");
         }
 
-        smsVerificationStorage.remove(requestDto.getAuthNumber());
+        smsVerificationStorage.remove(requestDto.getPhone());
 
         memberRepository.findByPhone(requestDto.getPhone())
                 .ifPresent(m -> {
