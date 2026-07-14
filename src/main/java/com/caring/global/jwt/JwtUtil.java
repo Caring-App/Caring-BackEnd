@@ -37,6 +37,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .subject(String.valueOf(memberId)) // 토큰 주인 누구야 + memberId 문자열로 변환
                 .claim("role",role) // 토큰 안에 추가 정보 넣기 -> 이 사람 role이 뭔지
+                .claim("tokenType", "ACCESS") // 토큰 타입 구분
                 .issuedAt(now) // 언제 만들었는지, 위에서 발급한 now 넣기
                 .expiration(new Date(now.getTime()+accessTokenExpiry))
                 // 만료 시간 추가 -> 지금 시간을 숫자로 변환 + 거기에 30분 더하기
@@ -51,6 +52,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .subject(String.valueOf(memberId))
                 .claim("role",role)
+                .claim("tokenType", "REFRESH") // 토큰 타입 구분
                 .issuedAt(now)
                 .expiration(new Date(now.getTime()+refreshTokenExpiry))
                 .signWith(secretKey)
@@ -90,6 +92,11 @@ public class JwtUtil {
     public String getRole(String token) {
         return getClaims(token).get("role",String.class);
         // get("role") = "role" 이라는 이름으로 넣은 값 꺼내고,
+        // String.class = String 타입으로 꺼내기
+    }
+    public String getTokenType(String token){
+        return getClaims(token).get("tokenType",String.class);
+        // get("tokenType") = "tokenType" 이라는 이름으로 넣은 값 꺼내고,
         // String.class = String 타입으로 꺼내기
     }
 }
