@@ -177,13 +177,17 @@ CREATE TABLE report_setting (
 -- Daily_Report 테이블 (일일 요약 레포트)
 -- ===========================================================
 CREATE TABLE daily_report (
-                              daily_report_id  BIGINT AUTO_INCREMENT PRIMARY KEY,
-                              ward_id          BIGINT NOT NULL,
-                              report_date      DATE NOT NULL,
-                              health_summary   VARCHAR(255) NULL,
-                              medication_rate  DOUBLE NULL,
-                              is_delivered     BOOLEAN NOT NULL DEFAULT FALSE,
-                              generated_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                              daily_report_id       BIGINT AUTO_INCREMENT PRIMARY KEY,
+                              ward_id               BIGINT NOT NULL,
+                              report_date           DATE NOT NULL,
+                              mood_status           VARCHAR(20) NULL,
+                              steps                 INT NULL,
+                              blood_sugar_value     INT NULL,
+                              blood_pressure_value  INT NULL,
+                              health_summary        VARCHAR(255) NULL,
+                              medication_rate       DOUBLE NULL,
+                              is_delivered          BOOLEAN NOT NULL DEFAULT FALSE,
+                              generated_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                               FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE,
                               UNIQUE KEY unique_ward_report_date (ward_id, report_date)
 );
