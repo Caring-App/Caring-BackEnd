@@ -14,11 +14,16 @@ public class PillLogService {
     private final PillLogRepository pillLogRepository;
 
     @Transactional
-    public PillLogResponseDto confirmPill(Long pillLogId){
+    public PillLogResponseDto confirmPill(Long wardId, Long pillLogId){
 
         //1. Pilllogid로 Pilllog 조회
         PillLog pillLog = pillLogRepository.findById(pillLogId)
                 .orElseThrow(() -> new IllegalArgumentException("복약 기록이 없습니다."));
+
+        Long ownerWardId = pillLog.getPillSchedule().getWard().getMemberId();
+        if(!ownerWardId.equals(wardId)){
+            throw new IllegalArgumentException("본인의 복약 기록만 확인할 수 있습니다.");
+        }
 
         //2. 이미 확인된거면 예외
         if (pillLog.isTaken()) {
