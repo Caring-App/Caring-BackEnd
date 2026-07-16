@@ -1,7 +1,7 @@
 package com.caring.domain.report.service;
 
-import com.caring.domain.member.entity.Member;
-import com.caring.domain.member.repository.MemberRepository;
+import com.caring.domain.connection.entity.Connection;
+import com.caring.domain.connection.repository.ConnectionRepository;
 import com.caring.domain.report.entity.ReportSetting;
 import com.caring.domain.report.repository.ReportSettingRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,39 +16,31 @@ import java.util.Optional;
 public class ReportSettingService {
 
     private final ReportSettingRepository reportSettingRepository;
-    private final MemberRepository memberRepository;
+    private final ConnectionRepository connectionRepository;
 
-    private static final LocalTime DEFAULT_REPORT_TIME = LocalTime.of(21, 0);
+    public LocalTime getEffectiveReportTime(Long protectorId, Long wardId) {
 
-    /**
-     * 보호자가 설정한 (또는 기본값) 레포트 시간 조회
-     * - MoodCheckService의 마감시간 체크, DailyReportScheduler의 발행 시점 판단에 공통으로 쓰임
-     */
-    public LocalTime getEffectiveReportTime(Long wardId) {
+        connectionRepository.findByProtector_MemberIdAndWard_MemberId(protectorId, wardId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 돌봄대상자에 대한 권한이 없습니다."));
 
-     return reportSettingRepository.findByWardId(wardId)
+        return reportSettingRepository.findByWardId(wardId)
                 .map(ReportSetting::getEffectiveReportTime)
-                .orElse(DEFAULT_REPORT_TIME);
+                .orElse(ReportSetting.DEFAULT_REPORT_TIME);
     }
 
-    /**
-     * 보호자가 레포트 시간을 변경 (최초 설정 or 기존 값 갱신)
-     */
     @Transactional
-    public void updateReportTime(Long wardId, LocalTime newTime) {
-        // 1. reportSettingRepository.findByWardId(wardId) 조회
+    public void updateReportTime(Long protectorId, Long wardId, LocalTime newTime) {
+
+        Connection connection = connectionRepository.findByProtector_MemberIdAndWard_MemberId(protectorId, wardId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 돌봄대상자에 대한 권한이 없습니다."));
+
         Optional<ReportSetting> existing = reportSettingRepository.findByWardId(wardId);
 
         if (existing.isPresent()) {
-            // 기존 설정이 있으면 시간 갱신
             existing.get().updateReportTime(newTime);
         } else {
-            // 없으면 신규 설정 생성
-            Member ward = memberRepository.findById(wardId)
-                    .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 돌봄대상자입니다."));
-
             ReportSetting newSetting = ReportSetting.builder()
-                    .ward(ward)
+                    .ward(connection.getWard())
                     .reportTime(newTime)
                     .build();
             reportSettingRepository.save(newSetting);

@@ -23,6 +23,8 @@ public class ReportSetting {
      * - 이 시간은 동시에 돌봄대상자의 기분/건강 기록 "수정 마감 시간"으로도 사용됨
      */
 
+    public static final LocalTime DEFAULT_REPORT_TIME = LocalTime.of(21, 0);
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "report_setting_id")
@@ -54,6 +56,6 @@ public class ReportSetting {
 
     // 실제 적용 할 레포츠 시간 조회 메소드 ( 설정 값 없으면 기본 값 반환 )
     public LocalTime getEffectiveReportTime() {
-        return reportTime != null ? reportTime : LocalTime.of(21, 0);
+        return reportTime != null ? reportTime : DEFAULT_REPORT_TIME;
     }
 }
