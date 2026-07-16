@@ -60,4 +60,14 @@ public class Member {
     }
 
     public void updatePassword(String password){ this.password =password; }
+
+    public void updateProfile(String nickname,
+                              String name,
+                              String phone,
+                              String address) {
+        this.nickname = nickname;
+        this.name = name;
+        this.phone = phone;
+        this.address = address;
+    }
 }
