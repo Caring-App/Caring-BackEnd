@@ -7,7 +7,6 @@ import com.caring.domain.member.repository.MemberRepository;
 import com.caring.domain.report.dto.MoodCheckRequestDto;
 import com.caring.domain.report.dto.MoodCheckResponseDto;
 import com.caring.domain.report.entity.MoodCheck;
-import com.caring.domain.report.entity.ReportSetting;
 import com.caring.domain.report.repository.MoodCheckRepository;
 import com.caring.domain.report.repository.ReportSettingRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,7 +25,6 @@ public class MoodCheckService {
     private final MemberRepository memberRepository;
     private final ConnectionRepository connectionRepository;
     private final ReportSettingService reportSettingService;
-    private ReportSettingRepository reportSettingRepository;
 
     /**
             * 돌봄대상자 본인이 오늘의 기분 상태 기록/수정 (upsert)
