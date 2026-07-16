@@ -40,12 +40,13 @@ public class ReportSettingService {
         Optional<ReportSetting> existing = reportSettingRepository.findByWardId(wardId);
 
         if (existing.isPresent()) {
-            // 2. 존재하면 setting.getEffectiveReportTime() 반환
+            // 기존 설정이 있으면 시간 갱신
             existing.get().updateReportTime(newTime);
         } else {
+            // 없으면 신규 설정 생성
             Member ward = memberRepository.findById(wardId)
                     .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 돌봄대상자입니다."));
-            // 3. 존재하지 않으면 DEFAULT_REPORT_TIME 반환
+
             ReportSetting newSetting = ReportSetting.builder()
                     .ward(ward)
                     .reportTime(newTime)
