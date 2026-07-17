@@ -8,6 +8,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS system_log;
 DROP TABLE IF EXISTS notification_log;
 DROP TABLE IF EXISTS location_log;
+DROP TABLE IF EXISTS step_record;
 DROP TABLE IF EXISTS health_record;
 DROP TABLE IF EXISTS daily_report;
 DROP TABLE IF EXISTS report_setting;
@@ -137,16 +138,27 @@ CREATE TABLE member_disease (
 );
 
 -- ===========================================================
--- Health_Record 테이블
+-- Health_Record 테이블 (기저질환 수치 전용)
 -- ===========================================================
 CREATE TABLE health_record (
                                health_id     BIGINT AUTO_INCREMENT PRIMARY KEY,
                                ward_id       BIGINT NOT NULL,
-                               health_type   VARCHAR(50) NOT NULL,
+                               disease_id    BIGINT NOT NULL,
                                health_value  INT NOT NULL,
-                               steps         INT NOT NULL DEFAULT 0,
                                recorded_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                               FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE
+                               FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE,
+                               FOREIGN KEY (disease_id) REFERENCES disease(disease_id) ON DELETE CASCADE
+);
+
+-- ===========================================================
+-- Step_Record 테이블 (걸음 수 전용)
+-- ===========================================================
+CREATE TABLE step_record (
+                             step_record_id  BIGINT AUTO_INCREMENT PRIMARY KEY,
+                             ward_id         BIGINT NOT NULL,
+                             steps           INT NOT NULL DEFAULT 0,
+                             recorded_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                             FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE
 );
 
 -- ===========================================================
