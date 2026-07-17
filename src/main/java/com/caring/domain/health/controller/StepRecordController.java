@@ -1,11 +1,14 @@
 package com.caring.domain.health.controller;
 
 import com.caring.domain.health.dto.StepRecordRequestDto;
+import com.caring.domain.health.dto.StepRecordResponseDto;
 import com.caring.domain.health.service.StepRecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/step-record")
@@ -25,5 +28,17 @@ public class StepRecordController {
 
         stepRecordService.recordSteps(wardId, requestDto.getSteps());
         return ResponseEntity.ok().build();
+    }
+
+    /*
+     * 보호자가 오늘 기록 조회
+     * GET http://localhost:8080/api/step-record/{wardId}
+     */
+    @GetMapping("/{wardId}")
+    public ResponseEntity<List<StepRecordResponseDto>> getTodaySteps(
+            @AuthenticationPrincipal Long protectorId,
+            @PathVariable Long wardId) {
+
+        return ResponseEntity.ok(stepRecordService.getTodaySteps(protectorId, wardId));
     }
 }

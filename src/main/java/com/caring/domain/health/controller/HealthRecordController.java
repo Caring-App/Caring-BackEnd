@@ -1,14 +1,14 @@
 package com.caring.domain.health.controller;
 
 import com.caring.domain.health.dto.HealthRecordRequestDto;
+import com.caring.domain.health.dto.HealthRecordResponseDto;
 import com.caring.domain.health.service.HealthRecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/health-record")
@@ -30,4 +30,15 @@ public class HealthRecordController {
         return ResponseEntity.ok().build();
     }
 
+    /*
+     * 보호자가 오늘 기록 조회
+     * GET http://localhost:8080/api/health-record/{wardId}
+     */
+    @GetMapping("/{wardId}")
+    public ResponseEntity<List<HealthRecordResponseDto>> getTodayHealthRecords(
+            @AuthenticationPrincipal Long protectorId,
+            @PathVariable Long wardId) {
+
+        return ResponseEntity.ok(healthRecordService.getTodayHealthRecords(protectorId, wardId));
+    }
 }
