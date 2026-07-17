@@ -25,7 +25,7 @@ public class ReportSettingController {
             @PathVariable Long wardId) {
 
         ReportTimeResponseDto response = ReportTimeResponseDto.builder()
-                .reportTime(reportSettingService.getEffectiveReportTime(protectorId, wardId))
+                .reportTime(reportSettingService.getEffectiveReportTime(wardId))
                 .build();
         return ResponseEntity.ok(response);
     }

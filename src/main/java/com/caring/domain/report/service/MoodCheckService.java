@@ -41,7 +41,7 @@ public class MoodCheckService {
         // 연결된 보호자가 있으면 마감시간 체크
         connectionRepository.findByWard(ward).ifPresent(connection -> {
                     Long protectorId = connection.getProtector().getMemberId();
-                    LocalTime deadline = reportSettingService.getEffectiveReportTime(protectorId, wardId);
+                    LocalTime deadline = reportSettingService.getEffectiveReportTime(wardId);
 
                     if (!LocalTime.now().isBefore(deadline)) {
                         throw new IllegalStateException("지금은 상태를 수정할 수 없습니다.");
