@@ -8,8 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/step-record")
 @RequiredArgsConstructor
@@ -35,7 +33,7 @@ public class StepRecordController {
      * GET http://localhost:8080/api/step-record/{wardId}
      */
     @GetMapping("/{wardId}")
-    public ResponseEntity<List<StepRecordResponseDto>> getTodaySteps(
+    public ResponseEntity<StepRecordResponseDto> getTodaySteps(
             @AuthenticationPrincipal Long protectorId,
             @PathVariable Long wardId) {
 
