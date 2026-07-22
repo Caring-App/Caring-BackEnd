@@ -373,7 +373,8 @@ public class MemberService {
 
         // 5. 새 비밀번호 암호화해서 업데이트 메소드 호출
         String encodedPassword = passwordEncoder.encode(requestDto.getNewPassword());
-        member.updatePassword(encodedPassword);    }
+        member.updatePassword(encodedPassword);
+    }
 
 
     // FCM Token 발급
@@ -383,5 +384,51 @@ public class MemberService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         member.updateFcmToken(requestDto.getFcmToken());
+    }
+
+    // 마이페이지 - 개인 정보 수정
+    @Transactional
+    public void updateMypage(Long memberId, MyPageUpdateRequest request){
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(()->new IllegalArgumentException("존재하지 않는 회원입니다.0"));
+
+        // 1. 연락처 수정
+        // 수정할 전화번호가 기존과 다를 때만 중복 체크하기
+        // 기존 번호와 같다면 예외 없이 그냥 업데이트
+        if (!member.getPhone().equals(request.getPhone())){
+            memberRepository.findByPhone(request.getPhone())
+                    .ifPresent(m->{
+                        throw new IllegalArgumentException("이미 가입된 전화번호 입니다.");
+                    });
+        }
+
+        // 회원가입과 달리 update라서 엔티티 필드만 교체하는 방식으로
+        member.updateContact(request.getPhone(), request.getAddress());
+
+        // 2. 비밀번호 변경은 새 비밀번호 필드가 채워져있을 때만 실행
+        // 비밀번호 칸 자체가 아예 null && 비어있거나 공백만 있어도 없는 걸로 처리
+        // newPassword가 null도 아니고, 빈 문자열/공백도 아니라면
+        // → 사용자가 진짜로 새 비밀번호를 입력한 것 → 비밀번호 변경 로직 실행
+        if (request.getNewPassword()!=null && !request.getNewPassword().isBlank()){
+
+            // 현재 비밀번호가 비어있으면 예외 던지기
+            if (request.getCurrentPassword()==null || request.getCurrentPassword().isBlank()){
+                throw new IllegalArgumentException("현재 비밀번호를 입력해주세요.");
+            }
+
+            // 현재 비밓번호와 일치하는지 확인
+            if(!passwordEncoder.matches(request.getCurrentPassword(), member.getPassword())){
+                throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+            }
+
+            // 3. 새 비밀번호 일치 확인
+            if (!request.getNewPassword().equals(request.getNewPasswordCheck())) {
+                throw new IllegalArgumentException("새 비밀번호가 일치하지 않습니다.");
+            }
+
+            // 새 비밀번호 암호화해서 업데이트 메소드 호출
+            String encodedPassword = passwordEncoder.encode(request.getNewPassword());
+            member.updatePassword(encodedPassword);
+        }
     }
 }

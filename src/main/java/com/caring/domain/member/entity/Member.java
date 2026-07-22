@@ -61,12 +61,19 @@ public class Member {
 
     public void updatePassword(String password){ this.password =password; }
 
+    // 돌봄대상자 관리 - 돌봄대상자 정보 수정 메소드
     public void updateProfile(String nickname,
                               String name,
                               String phone,
                               String address) {
         this.nickname = nickname;
         this.name = name;
+        this.phone = phone;
+        this.address = address;
+    }
+
+    // 마이페이지 - 개인 정보 수정 메소드
+    public void updateContact(String phone, String address){
         this.phone = phone;
         this.address = address;
     }

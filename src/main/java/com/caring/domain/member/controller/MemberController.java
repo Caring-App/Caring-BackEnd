@@ -2,6 +2,7 @@ package com.caring.domain.member.controller;
 
 import com.caring.domain.member.dto.FcmTokenRequestDto;
 import com.caring.domain.member.dto.LoginResponseDto;
+import com.caring.domain.member.dto.MyPageUpdateRequest;
 import com.caring.domain.member.entity.Member;
 import com.caring.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,15 @@ public class MemberController {
             @RequestBody FcmTokenRequestDto requestDto
             ) {
         memberService.updateFcmToken(memberId, requestDto);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping
+    public ResponseEntity<Void> updateMypage(
+            @AuthenticationPrincipal Long memberId,
+            @RequestBody MyPageUpdateRequest request
+            ){
+        memberService.updateMypage(memberId,request);
         return ResponseEntity.ok().build();
     }
 }
