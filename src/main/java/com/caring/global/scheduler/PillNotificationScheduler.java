@@ -2,6 +2,7 @@ package com.caring.global.scheduler;
 
 import com.caring.domain.connection.repository.ConnectionRepository;
 import com.caring.domain.member.entity.Member;
+import com.caring.domain.notification.service.NotificationLogService;
 import com.caring.domain.pill.entity.PillLog;
 import com.caring.domain.pill.entity.PillSchedule;
 import com.caring.domain.pill.repository.PillLogRepository;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -29,7 +31,9 @@ public class PillNotificationScheduler {
     private final FcmService fcmService;
     private final PillLogRepository pillLogRepository;
     private final ConnectionRepository connectionRepository;
+    private final NotificationLogService notificationLogService;
 
+    @Transactional
     @Scheduled(cron = "0 * * * * *")
     public void checkAndSendPillNotifications() {
         LocalTime now = LocalTime.now().withSecond(0).withNano(0);
@@ -79,6 +83,7 @@ public class PillNotificationScheduler {
         }
     }
 
+    @Transactional
     @Scheduled(cron = "0 * * * * *")
     public void checkAndSendRetryNotifications() {
         LocalTime now = LocalTime.now().withSecond(0).withNano(0);
@@ -123,9 +128,10 @@ public class PillNotificationScheduler {
 
                     try {
                         fcmService.sendNotificationWithData(fcmToken, title, body, dataPayload);
-                        pillLog.increaseRetryCount();
                     } catch (Exception e) {
                         log.error("[재알림 발송 실패] 에러: {}", e.getMessage());
+                    } finally {
+                        pillLog.increaseRetryCount();
                     }
                 }
             }
@@ -137,12 +143,14 @@ public class PillNotificationScheduler {
 
         connectionRepository.findByWard(ward).ifPresentOrElse(connection -> {
             Member protector = connection.getProtector();
+
+            String title = "⚠️ 미응답 알림";
+            String body = ward.getName() + " 님이 [" + schedule.getPillName().getDescription() + "] 복약 확인을 하지 않으셨어요.";
+
+            notificationLogService.saveLog(protector, title, body);
+
             String protectorFcmToken = protector.getFcmToken();
-
             if (protectorFcmToken != null && !protectorFcmToken.isBlank()) {
-                String title = "⚠️ 미응답 알림";
-                String body = ward.getName() + " 님이 [" + schedule.getPillName().getDescription() + "] 복약 확인을 하지 않으셨어요.";
-
                 try {
                     fcmService.sendNotification(protectorFcmToken, title, body);
                 } catch (Exception e) {
