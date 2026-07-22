@@ -157,8 +157,9 @@ CREATE TABLE step_record (
                              step_record_id  BIGINT AUTO_INCREMENT PRIMARY KEY,
                              ward_id         BIGINT NOT NULL,
                              steps           INT NOT NULL DEFAULT 0,
-                             recorded_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                             FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE
+                             recorded_date   DATE NOT NULL,
+                             FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE,
+                             UNIQUE KEY unique_ward_recorded_date (ward_id, recorded_date)
 );
 
 -- ===========================================================
