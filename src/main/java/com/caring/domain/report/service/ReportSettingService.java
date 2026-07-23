@@ -25,7 +25,7 @@ public class ReportSettingService {
      * - 대상자 본인의 기분 체크 마감시간 판단, 배치 스케줄러 등 시스템 내부용
      */
     public LocalTime getEffectiveReportTime(Long wardId) {
-        return reportSettingRepository.findByWardId(wardId)
+        return reportSettingRepository.findByWardMemberId(wardId)
                 .map(ReportSetting::getEffectiveReportTime)
                 .orElse(DEFAULT_REPORT_TIME);
     }
@@ -40,7 +40,7 @@ public class ReportSettingService {
         Connection connection = connectionRepository.findByProtector_MemberIdAndWard_MemberId(protectorId, wardId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 돌봄대상자에 대한 권한이 없습니다."));
 
-        Optional<ReportSetting> existing = reportSettingRepository.findByWardId(wardId);
+        Optional<ReportSetting> existing = reportSettingRepository.findByWardMemberId(wardId);
 
         if (existing.isPresent()) {
             existing.get().updateReportTime(newTime);

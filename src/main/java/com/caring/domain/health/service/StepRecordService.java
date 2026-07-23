@@ -41,7 +41,7 @@ public class StepRecordService {
         LocalDate today = LocalDate.now();
 
         // 기존 걸음수 조회
-        Optional<StepRecord> exsitngRecord = stepRecordRepository.findByWardIdAndRecordedDate(wardId,today);
+        Optional<StepRecord> exsitngRecord = stepRecordRepository.findByWardMemberIdAndRecordedDate(wardId,today);
 
         if (exsitngRecord.isPresent()){
 
@@ -74,7 +74,7 @@ public class StepRecordService {
 
         // 2. 오늘 날짜로 조회
         LocalDate today = LocalDate.now();
-        Optional<StepRecord> records = stepRecordRepository.findByWardIdAndRecordedDate(wardId,today);
+        Optional<StepRecord> records = stepRecordRepository.findByWardMemberIdAndRecordedDate(wardId,today);
 
         // 3. 있으면 DTO 리스트로 변환, 없으면 null 리턴 ( 아직 오늘의 기록이 없는 경우 )
         return records

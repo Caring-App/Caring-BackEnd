@@ -12,6 +12,6 @@ public interface MoodCheckRepository extends JpaRepository<MoodCheck, Long> {
      * - upsert 로직(있으면 UPDATE, 없으면 INSERT)의 있는지 확인 단계에서 사용
      * - 마감시간 체크 후 오늘자 기록을 가져올 때도 동일하게 사용
      */
-    Optional<MoodCheck> findByWardIdAndRecordDate(Long wardId, LocalDate recordDate);
+    Optional<MoodCheck> findByWardMemberIdAndRecordDate(Long wardId, LocalDate recordDate);
 }
 

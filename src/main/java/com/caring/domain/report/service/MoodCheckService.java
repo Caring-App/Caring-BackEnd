@@ -49,7 +49,7 @@ public class MoodCheckService {
                 });
 
         // 오늘 기록이 있으면 수정, 없으면 새로 생성
-        Optional<MoodCheck> existing = moodCheckRepository.findByWardIdAndRecordDate(wardId, today);
+        Optional<MoodCheck> existing = moodCheckRepository.findByWardMemberIdAndRecordDate(wardId, today);
 
         if(existing.isPresent()){
             existing.get().updateMood(requestDto.getMoodStatus());
@@ -74,7 +74,7 @@ public class MoodCheckService {
 
         // 2. 오늘 기록 조회 (없으면 예외)
         LocalDate today = LocalDate.now();
-        MoodCheck todayMood = moodCheckRepository.findByWardIdAndRecordDate(wardId,today)
+        MoodCheck todayMood = moodCheckRepository.findByWardMemberIdAndRecordDate(wardId,today)
                 .orElseThrow(()->new IllegalArgumentException("아직 오늘의 기록이 없습니다."));
 
         // 3. DTO로 변환해서 반환

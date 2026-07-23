@@ -72,7 +72,7 @@ public class HealthRecordService {
         LocalDate today = LocalDate.now();
         LocalDateTime startOfDay = today.atStartOfDay();
         LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
-        List<HealthRecord> records = healthRecordRepository.findAllByWardIdAndRecordedAtBetween(wardId, startOfDay, endOfDay);
+        List<HealthRecord> records = healthRecordRepository.findAllByWardMemberIdAndRecordedAtBetween(wardId, startOfDay, endOfDay);
 
         // 3. DTO 리스트로 변환
         return records.stream()

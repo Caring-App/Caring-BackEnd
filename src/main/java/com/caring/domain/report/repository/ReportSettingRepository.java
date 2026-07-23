@@ -11,5 +11,5 @@ public interface ReportSettingRepository extends JpaRepository<ReportSetting, Lo
      * - ward당 설정은 1건뿐 (1:1 관계, DB 유니크 제약)
      * - 없으면 아직 설정을 안 한 상태 → 서비스 레이어에서 기본값(21:00) 처리
      */
-    Optional<ReportSetting> findByWardId(Long wardId);
+    Optional<ReportSetting> findByWardMemberId(Long wardId);
 }

@@ -13,6 +13,6 @@ public interface HealthRecordRepository extends JpaRepository<HealthRecord, Long
      * - 하루 여러 건 있을 수 있어 리스트로 반환
      * - DailyReportService에서 오늘자 혈당/혈압 등 최신값 추출할 때 사용
      */
-    List<HealthRecord> findAllByWardIdAndRecordedAtBetween(
+    List<HealthRecord> findAllByWardMemberIdAndRecordedAtBetween(
             Long wardId, LocalDateTime startOfDay, LocalDateTime endOfDay);
 }

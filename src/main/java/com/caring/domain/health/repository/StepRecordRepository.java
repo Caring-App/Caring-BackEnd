@@ -13,5 +13,5 @@ public interface StepRecordRepository extends JpaRepository<StepRecord, Long> {
      * - upsert 시 기존 row 존재 여부 확인용
      * - DailyReportService에서 오늘자 걸음 수 조회 시에도 사용
      */
-    Optional<StepRecord> findByWardIdAndRecordedDate(Long wardId, LocalDate recordedDate);
+    Optional<StepRecord> findByWardMemberIdAndRecordedDate(Long wardId, LocalDate recordedDate);
 }
