@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS notification_log;
 DROP TABLE IF EXISTS location_log;
 DROP TABLE IF EXISTS step_record;
 DROP TABLE IF EXISTS health_record;
+DROP TABLE IF EXISTS daily_report_health_detail;
 DROP TABLE IF EXISTS daily_report;
 DROP TABLE IF EXISTS report_setting;
 DROP TABLE IF EXISTS mood_check;
@@ -195,14 +196,25 @@ CREATE TABLE daily_report (
                               report_date           DATE NOT NULL,
                               mood_status           VARCHAR(20) NULL,
                               steps                 INT NULL,
-                              blood_sugar_value     INT NULL,
-                              blood_pressure_value  INT NULL,
                               health_summary        VARCHAR(255) NULL,
                               medication_rate       DOUBLE NULL,
                               is_delivered          BOOLEAN NOT NULL DEFAULT FALSE,
                               generated_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                               FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE,
                               UNIQUE KEY unique_ward_report_date (ward_id, report_date)
+);
+
+-- ===========================================================
+-- daily_report_health_detail 테이블
+-- ===========================================================
+CREATE TABLE daily_report_health_detail (
+                                            detail_id        BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                            daily_report_id  BIGINT NOT NULL,
+                                            disease_id       BIGINT NOT NULL,
+                                            avg_value        DOUBLE NOT NULL,
+                                            FOREIGN KEY (daily_report_id) REFERENCES daily_report(daily_report_id) ON DELETE CASCADE,
+                                            FOREIGN KEY (disease_id) REFERENCES disease(disease_id) ON DELETE CASCADE,
+                                            UNIQUE KEY unique_report_disease (daily_report_id, disease_id)
 );
 
 -- ===========================================================
