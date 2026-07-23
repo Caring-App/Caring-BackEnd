@@ -37,4 +37,11 @@ public interface PillLogRepository extends JpaRepository<PillLog,Long> {
             //    "이미 에스컬레이션 끝난 로그"는 이 목록에서 자동으로 제외되게 만듦
             "AND pl.currentRetryCount < :maxRetry")
     List<PillLog>findPendingLogsByDate(@Param("today")LocalDate today, @Param("maxRetry") int maxRetry);
+
+    // 특정 ward의 특정 날짜 전체 복약 로그 조회 (복약률 계산용)
+    @Query("SELECT pl FROM PillLog pl " +
+            "JOIN pl.pillSchedule ps " +
+            "WHERE ps.ward.memberId = :wardId " +
+            "AND pl.recordDate = :recordDate")
+    List<PillLog> findAllByWardIdAndRecordDate(@Param("wardId") Long wardId, @Param("recordDate") LocalDate recordDate);
 }
