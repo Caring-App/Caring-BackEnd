@@ -41,12 +41,6 @@ public class DailyReport {
     @Column(name = "steps")
     private Integer steps;       // 오늘의 걸음 수
 
-    @Column(name = "blood_sugar_value")
-    private Integer bloodSugarValue;   // 오늘의 혈당 수치, 미입력 시 null
-
-    @Column(name = "blood_pressure_value")
-    private Integer bloodPressureValue;   // 오늘의 혈압 수치, 미입력 시 null
-
     @Column(name = "health_summary")
     private String healthSummary; // 당일 기분/건강 상태 요약 텍스트
 
@@ -61,14 +55,11 @@ public class DailyReport {
 
     @Builder
     public DailyReport(Member ward, LocalDate reportDate, String moodStatus, Integer steps,
-                       Integer bloodSugarValue, Integer bloodPressureValue,
                        String healthSummary, Double medicationRate) {
         this.ward = ward;
         this.reportDate = reportDate;
         this.moodStatus = moodStatus;
         this.steps = steps;
-        this.bloodSugarValue = bloodSugarValue;
-        this.bloodPressureValue = bloodPressureValue;
         this.healthSummary = healthSummary;
         this.medicationRate = medicationRate;
         this.isDelivered = false;
