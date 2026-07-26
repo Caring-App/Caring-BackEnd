@@ -1,9 +1,11 @@
 package com.caring.domain.report.repository;
 
 import com.caring.domain.report.entity.DailyReport;
+import com.caring.domain.report.entity.ReportSetting;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,4 +23,6 @@ public interface DailyReportRepository extends JpaRepository<DailyReport, Long> 
      */
     List<DailyReport> findByWardMemberIdAndReportDateBetweenOrderByReportDateAsc(
             Long wardId, LocalDate startDate, LocalDate endDate);
+
+    List<ReportSetting> findByReportTime(LocalTime reportTime);
 }
