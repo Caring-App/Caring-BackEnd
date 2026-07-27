@@ -1,5 +1,7 @@
 package com.caring.domain.report.service;
 
+import com.caring.domain.connection.entity.Connection;
+import com.caring.domain.connection.repository.ConnectionRepository;
 import com.caring.domain.health.entity.HealthRecord;
 import com.caring.domain.health.repository.HealthRecordRepository;
 import com.caring.domain.health.repository.StepRecordRepository;
@@ -8,6 +10,7 @@ import com.caring.domain.member.entity.Member;
 import com.caring.domain.member.repository.MemberRepository;
 import com.caring.domain.pill.entity.PillLog;
 import com.caring.domain.pill.repository.PillLogRepository;
+import com.caring.domain.report.dto.DailyReportResponseDto;
 import com.caring.domain.report.entity.DailyReport;
 import com.caring.domain.report.entity.DailyReportHealthDetail;
 import com.caring.domain.report.repository.DailyReportHealthDetailRepository;
@@ -37,6 +40,7 @@ public class DailyReportService {
     private final MemberRepository memberRepository;
     private final PillLogRepository pillLogRepository;
     private final DailyReportHealthDetailRepository dailyReportHealthDetailRepository;
+    private final ConnectionRepository connectionRepository;
 
     /**
      * 오늘자 mood/health/step 데이터를 모아 daily_report 한 건 생성
@@ -121,5 +125,43 @@ public class DailyReportService {
             dailyReportHealthDetailRepository.save(detail);
         });
 
+    }
+
+    /**
+     * 보호자가 대상자의 오늘자 리포트 조회
+     * - 연결된 보호자인지 권한 검증 필수 (ReportSettingService.updateReportTime 패턴 참고)
+     */
+    public DailyReportResponseDto getTodayReport(Long protectorId, Long wardId) {
+
+        // protectorId-wardId 연결 검증
+        Connection exist = connectionRepository.findByProtector_MemberIdAndWard_MemberId(protectorId,wardId)
+                .orElseThrow(()->new IllegalArgumentException("해당 돌봄대상자에 대한 권한이 없습니다."));
+
+
+        // 오늘자 리포트 조회
+        DailyReport newReport = dailyReportRepository.findByWardMemberIdAndReportDate(wardId,LocalDate.now())
+                .orElseThrow(()->new IllegalArgumentException("오늘의 리포트가 존재하지 않습니다"));
+
+        // DailyReportHealthDetail 조회해서 DTO로 변환
+        List<DailyReportHealthDetail> details = dailyReportHealthDetailRepository.findByDailyReportId(newReport.getId());
+
+        List<DailyReportResponseDto.HealthDetailDto> healthDetails= details.stream()
+                .map(detail->DailyReportResponseDto.HealthDetailDto.builder()
+                        .diseaseName(detail.getDisease().getDiseaseName())
+                        .avgValue(detail.getAvgValue())
+                        .build())
+                .toList();
+
+
+        return DailyReportResponseDto.builder()
+                .reportId(newReport.getId())
+                .reportDate(newReport.getReportDate())
+                .moodStatus(newReport.getMoodStatus())
+                .steps(newReport.getSteps())
+                .healthSummary(newReport.getHealthSummary())
+                .medicationRate(newReport.getMedicationRate())
+                .isDelivered(newReport.getIsDelivered())
+                .healthDetails(healthDetails)
+                .build();
     }
 }
