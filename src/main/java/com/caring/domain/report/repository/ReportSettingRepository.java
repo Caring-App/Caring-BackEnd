@@ -3,6 +3,8 @@ package com.caring.domain.report.repository;
 import com.caring.domain.report.entity.ReportSetting;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface ReportSettingRepository extends JpaRepository<ReportSetting, Long> {
@@ -12,4 +14,7 @@ public interface ReportSettingRepository extends JpaRepository<ReportSetting, Lo
      * - 없으면 아직 설정을 안 한 상태 → 서비스 레이어에서 기본값(21:00) 처리
      */
     Optional<ReportSetting> findByWardMemberId(Long wardId);
+
+    List<ReportSetting> findByReportTime(LocalTime reportTime);
+
 }

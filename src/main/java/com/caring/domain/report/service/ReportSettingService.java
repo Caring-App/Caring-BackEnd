@@ -2,6 +2,7 @@ package com.caring.domain.report.service;
 
 import com.caring.domain.connection.entity.Connection;
 import com.caring.domain.connection.repository.ConnectionRepository;
+import com.caring.domain.member.entity.Member;
 import com.caring.domain.report.entity.ReportSetting;
 import com.caring.domain.report.repository.ReportSettingRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,19 @@ public class ReportSettingService {
     private final ConnectionRepository connectionRepository;
 
     private static final LocalTime DEFAULT_REPORT_TIME = LocalTime.of(21, 0);
+
+    /**
+     * 돌봄대상자 회원가입 시 기본 리포트 시간(21:00) 설정 생성
+     * - MemberService에서 ward 생성 직후 호출
+     */
+    @Transactional
+    public void createDefaultSetting(Member ward) {
+        ReportSetting newReport = ReportSetting.builder()
+                .ward(ward)
+                .reportTime(DEFAULT_REPORT_TIME)
+                .build();
+        reportSettingRepository.save(newReport);
+    }
 
     /**
      * 읽기 전용 — 권한 검증 없이 "지금 적용되는 마감시간"만 조회
@@ -52,4 +66,6 @@ public class ReportSettingService {
             reportSettingRepository.save(newSetting);
         }
     }
+
+
 }

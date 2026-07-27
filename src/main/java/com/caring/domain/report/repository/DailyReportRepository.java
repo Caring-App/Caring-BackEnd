@@ -1,9 +1,11 @@
 package com.caring.domain.report.repository;
 
 import com.caring.domain.report.entity.DailyReport;
+import com.caring.domain.report.entity.ReportSetting;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,4 +23,9 @@ public interface DailyReportRepository extends JpaRepository<DailyReport, Long> 
      */
     List<DailyReport> findByWardMemberIdAndReportDateBetweenOrderByReportDateAsc(
             Long wardId, LocalDate startDate, LocalDate endDate);
+
+    /**
+     * 특정 ward의 오늘자 레포트 존재 여부 (중복 생성 방지용)
+     */
+    boolean existsByWardMemberIdAndReportDate(Long wardId, LocalDate reportDate);
 }

@@ -5,6 +5,7 @@ import com.caring.domain.member.entity.*;
 import com.caring.domain.member.repository.DiseaseRepository;
 import com.caring.domain.member.repository.MemberDiseaseRepository;
 import com.caring.domain.member.repository.MemberRepository;
+import com.caring.domain.report.service.ReportSettingService;
 import com.caring.global.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +31,7 @@ public class MemberService {
     private final JwtUtil jwtUtil;
     private final Map<String, SmsVerification> smsVerificationStorage = new ConcurrentHashMap<>();
     private final SocialLoginService socialLoginService;
+    private final ReportSettingService reportSettingService;
 
 
     private static class SmsVerification {
@@ -157,6 +159,8 @@ public class MemberService {
 
         Member savedWard = memberRepository.save(newWard);
 
+        reportSettingService.createDefaultSetting(savedWard);
+
         List<String> savedDiseaseNames = new ArrayList<>();
         if(requestDto.getDiseases() != null) {
             for(String diseaseName : requestDto.getDiseases()) {
@@ -271,6 +275,11 @@ public class MemberService {
                 .build();
 
         Member savedMember = memberRepository.save(newmember);
+
+        // 돌봄대상자라면 레포트 생성
+        if (requestDto.getRole() == Role.WARD) {
+            reportSettingService.createDefaultSetting(savedMember);
+        }
 
         //5. 돌봄대상자라면 질병 저장
         List<String> savedDiseaseNames = new ArrayList<>();
