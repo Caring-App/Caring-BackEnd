@@ -33,6 +33,7 @@ public class PillNotificationScheduler {
     private final ConnectionRepository connectionRepository;
     private final NotificationLogService notificationLogService;
 
+    // 최초 복약 알림
     @Transactional
     @Scheduled(cron = "0 * * * * *")
     public void checkAndSendPillNotifications() {
@@ -68,7 +69,6 @@ public class PillNotificationScheduler {
                     Map<String, String> dataPayload = new HashMap<>();
                     dataPayload.put("alarmType", schedule.getAlarmType().name());
                     dataPayload.put("voiceFileUrl", schedule.getVoiceFileUrl() != null ? schedule.getVoiceFileUrl() : "");
-
                     dataPayload.put("pillLogId", pillLog.getPillLogId().toString());
 
                     try {
@@ -83,6 +83,7 @@ public class PillNotificationScheduler {
         }
     }
 
+    // 미복약시 재알림 + 최종 보호자 알림
     @Transactional
     @Scheduled(cron = "0 * * * * *")
     public void checkAndSendRetryNotifications() {
@@ -123,7 +124,6 @@ public class PillNotificationScheduler {
                     Map<String, String> dataPayload = new HashMap<>();
                     dataPayload.put("alarmType", schedule.getAlarmType().name());
                     dataPayload.put("voiceFileUrl", schedule.getVoiceFileUrl() != null ? schedule.getVoiceFileUrl() : "");
-
                     dataPayload.put("pillLogId", pillLog.getPillLogId().toString());
 
                     try {
@@ -138,6 +138,7 @@ public class PillNotificationScheduler {
         }
     }
 
+    // 보호자에게 최종 알림
     private void notifyProtector(PillSchedule schedule, PillLog pillLog) {
         Member ward = schedule.getWard();
 
