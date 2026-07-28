@@ -29,6 +29,8 @@ public class DailyReportScheduler {
         // 현재 시각이 마감시간인 ReportSetting들 조회
         List<ReportSetting> targetSettings = reportSettingRepository.findByReportTime(now);
 
+        log.info("[스케줄러 가동] 현재시각: {}, 대상자 수: {}", now, targetSettings.size());
+
         for (ReportSetting setting : targetSettings) {
             Long wardId = setting.getWard().getMemberId();
 

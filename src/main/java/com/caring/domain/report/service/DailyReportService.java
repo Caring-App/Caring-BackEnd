@@ -96,6 +96,7 @@ public class DailyReportService {
         - 오늘 복약 이행률: %s
         - 오늘 걸음 수: %s보
         """,
+                ward.getName(),
                 moodStatus == null ? "체크 안 함" : moodStatus,
                 medicationRate == null ? "오늘 복용할 약 없음" : String.format("%.0f%%", medicationRate),
                 step == null ? "기록 없음" : step);
