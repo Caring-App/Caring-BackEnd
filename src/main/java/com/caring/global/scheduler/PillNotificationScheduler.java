@@ -106,7 +106,7 @@ public class PillNotificationScheduler {
             }
 
             // 4. 재알림 횟수가 3 이상이면 -> 보호자 알림 + escalate()
-            if (retryCount>=3) {
+            if (retryCount>=2) {
                 // 3번 재알림 완료 된 상태 -> 보호자에게 알림, 재시도 X
                 notifyProtector(schedule, pillLog);
                 pillLog.escalate();

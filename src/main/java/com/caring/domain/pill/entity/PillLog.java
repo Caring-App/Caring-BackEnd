@@ -49,6 +49,12 @@ public class PillLog {
         this.currentRetryCount = ESCALATED;
     }
 
+    public void resetForRetry() {
+        this.isTaken = false;
+        this.confirmedAt = null;
+        this.currentRetryCount = 0;
+    }
+
     public static final int ESCALATED = 4;
 
 }
