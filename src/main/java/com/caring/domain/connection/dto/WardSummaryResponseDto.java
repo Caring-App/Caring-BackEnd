@@ -8,8 +8,9 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class WardSummaryResponseDto {
-    private Long connentionId;
+    private Long connectionId;
     private Long wardId;
     private String wardName;
+    private String nickname;
     private LocalDateTime linkedAt;
 }
