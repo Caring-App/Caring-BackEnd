@@ -440,4 +440,24 @@ public class MemberService {
             member.updatePassword(encodedPassword);
         }
     }
+
+    /**
+     * 보호자 본인의 고유코드 재조회
+     */
+    public ProtectorCodeResponseDto getProtectorCode(Long memberId) {
+        //회원 조회
+        Member member = memberRepository.findById(memberId).orElseThrow(()->new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        //조회한 member의 role이 PROTECTOR가 맞는지 확인
+        //대상자가 호출하면 protectorCode가 애초에 null이니까 막아주는 게 안전
+            if (member.getRole() != Role.PROTECTOR) {
+                     throw new IllegalArgumentException("보호자만 조회할 수 있습니다.");
+                 }
+
+        //ProtectorCodeResponseDto.builder()로 조립
+        return ProtectorCodeResponseDto.builder()
+                .protectorCode(member.getProtectorCode())
+                .build();
+
+    }
 }
