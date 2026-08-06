@@ -6,12 +6,14 @@ import com.caring.domain.member.repository.MemberRepository;
 import com.caring.domain.pill.dto.PillScheduleRequestDto;
 import com.caring.domain.pill.dto.PillScheduleResponseDto;
 import com.caring.domain.pill.entity.PillSchedule;
+import com.caring.domain.pill.repository.PillLogRepository;
 import com.caring.domain.pill.repository.PillScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 public class PillScheduleService {
 
     private final PillScheduleRepository pillScheduleRepository;
+    private final PillLogRepository pillLogRepository;
     private final MemberRepository memberRepository;
     private final ConnectionRepository connectionRepository;
 
@@ -81,6 +84,13 @@ public class PillScheduleService {
                 requestDto.getAlarmType(),
                 requestDto.getVoiceFileUrl()
         );
+
+        pillLogRepository.findByPillScheduleAndRecordDate(pillSchedule, LocalDate.now())
+                .ifPresent(pillLog -> {
+                    if(!pillLog.isTaken()) {
+                        pillLog.resetForRetry();
+                    }
+                });
 
         return new PillScheduleResponseDto(pillSchedule);
     }

@@ -2,6 +2,7 @@ package com.caring.global.scheduler;
 
 import com.caring.domain.connection.repository.ConnectionRepository;
 import com.caring.domain.member.entity.Member;
+import com.caring.domain.notification.service.NotificationLogService;
 import com.caring.domain.pill.entity.PillLog;
 import com.caring.domain.pill.entity.PillSchedule;
 import com.caring.domain.pill.repository.PillLogRepository;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -29,7 +31,10 @@ public class PillNotificationScheduler {
     private final FcmService fcmService;
     private final PillLogRepository pillLogRepository;
     private final ConnectionRepository connectionRepository;
+    private final NotificationLogService notificationLogService;
 
+    // 최초 복약 알림
+    @Transactional
     @Scheduled(cron = "0 * * * * *")
     public void checkAndSendPillNotifications() {
         LocalTime now = LocalTime.now().withSecond(0).withNano(0);
@@ -64,7 +69,6 @@ public class PillNotificationScheduler {
                     Map<String, String> dataPayload = new HashMap<>();
                     dataPayload.put("alarmType", schedule.getAlarmType().name());
                     dataPayload.put("voiceFileUrl", schedule.getVoiceFileUrl() != null ? schedule.getVoiceFileUrl() : "");
-
                     dataPayload.put("pillLogId", pillLog.getPillLogId().toString());
 
                     try {
@@ -79,6 +83,8 @@ public class PillNotificationScheduler {
         }
     }
 
+    // 미복약시 재알림 + 최종 보호자 알림
+    @Transactional
     @Scheduled(cron = "0 * * * * *")
     public void checkAndSendRetryNotifications() {
         LocalTime now = LocalTime.now().withSecond(0).withNano(0);
@@ -100,7 +106,7 @@ public class PillNotificationScheduler {
             }
 
             // 4. 재알림 횟수가 3 이상이면 -> 보호자 알림 + escalate()
-            if (retryCount>=3) {
+            if (retryCount>=2) {
                 // 3번 재알림 완료 된 상태 -> 보호자에게 알림, 재시도 X
                 notifyProtector(schedule, pillLog);
                 pillLog.escalate();
@@ -118,31 +124,34 @@ public class PillNotificationScheduler {
                     Map<String, String> dataPayload = new HashMap<>();
                     dataPayload.put("alarmType", schedule.getAlarmType().name());
                     dataPayload.put("voiceFileUrl", schedule.getVoiceFileUrl() != null ? schedule.getVoiceFileUrl() : "");
-
                     dataPayload.put("pillLogId", pillLog.getPillLogId().toString());
 
                     try {
                         fcmService.sendNotificationWithData(fcmToken, title, body, dataPayload);
-                        pillLog.increaseRetryCount();
                     } catch (Exception e) {
                         log.error("[재알림 발송 실패] 에러: {}", e.getMessage());
+                    } finally {
+                        pillLog.increaseRetryCount();
                     }
                 }
             }
         }
     }
 
+    // 보호자에게 최종 알림
     private void notifyProtector(PillSchedule schedule, PillLog pillLog) {
         Member ward = schedule.getWard();
 
         connectionRepository.findByWard(ward).ifPresentOrElse(connection -> {
             Member protector = connection.getProtector();
+
+            String title = "⚠️ 미응답 알림";
+            String body = ward.getName() + " 님이 [" + schedule.getPillName().getDescription() + "] 복약 확인을 하지 않으셨어요.";
+
+            notificationLogService.saveLog(protector, title, body);
+
             String protectorFcmToken = protector.getFcmToken();
-
             if (protectorFcmToken != null && !protectorFcmToken.isBlank()) {
-                String title = "⚠️ 미응답 알림";
-                String body = ward.getName() + " 님이 [" + schedule.getPillName().getDescription() + "] 복약 확인을 하지 않으셨어요.";
-
                 try {
                     fcmService.sendNotification(protectorFcmToken, title, body);
                 } catch (Exception e) {

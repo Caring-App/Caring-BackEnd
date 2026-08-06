@@ -49,6 +49,9 @@ dependencies {
 
 	// Swagger (springdoc-openapi)
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
+
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'  // WebClient 사용을 위함
+
 }
 
 tasks.named('test') {

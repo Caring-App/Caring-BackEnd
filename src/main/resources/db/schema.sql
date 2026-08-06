@@ -8,7 +8,12 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS system_log;
 DROP TABLE IF EXISTS notification_log;
 DROP TABLE IF EXISTS location_log;
+DROP TABLE IF EXISTS step_record;
 DROP TABLE IF EXISTS health_record;
+DROP TABLE IF EXISTS daily_report_health_detail;
+DROP TABLE IF EXISTS daily_report;
+DROP TABLE IF EXISTS report_setting;
+DROP TABLE IF EXISTS mood_check;
 DROP TABLE IF EXISTS member_disease;
 DROP TABLE IF EXISTS disease;
 DROP TABLE IF EXISTS setting;
@@ -134,16 +139,82 @@ CREATE TABLE member_disease (
 );
 
 -- ===========================================================
--- Health_Record 테이블
+-- Health_Record 테이블 (기저질환 수치 전용)
 -- ===========================================================
 CREATE TABLE health_record (
                                health_id     BIGINT AUTO_INCREMENT PRIMARY KEY,
                                ward_id       BIGINT NOT NULL,
-                               health_type   VARCHAR(50) NOT NULL,
+                               disease_id    BIGINT NOT NULL,
                                health_value  INT NOT NULL,
-                               steps         INT NOT NULL DEFAULT 0,
                                recorded_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                               FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE
+                               FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE,
+                               FOREIGN KEY (disease_id) REFERENCES disease(disease_id) ON DELETE CASCADE
+);
+
+-- ===========================================================
+-- Step_Record 테이블 (걸음 수 전용)
+-- ===========================================================
+CREATE TABLE step_record (
+                             step_record_id  BIGINT AUTO_INCREMENT PRIMARY KEY,
+                             ward_id         BIGINT NOT NULL,
+                             steps           INT NOT NULL DEFAULT 0,
+                             recorded_date   DATE NOT NULL,
+                             FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE,
+                             UNIQUE KEY unique_ward_recorded_date (ward_id, recorded_date)
+);
+
+-- ===========================================================
+-- Mood_Check 테이블 (오늘의 기분 확인 — 좋음/무난/나쁨)
+-- ===========================================================
+CREATE TABLE mood_check (
+                            mood_check_id  BIGINT AUTO_INCREMENT PRIMARY KEY,
+                            ward_id        BIGINT NOT NULL,
+                            mood_status    ENUM('GOOD', 'NORMAL', 'BAD') NOT NULL,
+                            record_date    DATE NOT NULL,
+                            checked_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                            FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE,
+                            UNIQUE KEY unique_ward_record_date (ward_id, record_date)
+);
+
+-- ===========================================================
+-- Report_Setting 테이블 (보호자별 레포트 수신 시간 설정)
+-- ===========================================================
+CREATE TABLE report_setting (
+                                report_setting_id  BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                ward_id            BIGINT NOT NULL UNIQUE,
+                                report_time        TIME NULL,   -- NULL이면 기본값 21:00 (애플리케이션 레벨에서 처리)
+                                updated_at         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE
+);
+
+-- ===========================================================
+-- Daily_Report 테이블 (일일 요약 레포트)
+-- ===========================================================
+CREATE TABLE daily_report (
+                              daily_report_id       BIGINT AUTO_INCREMENT PRIMARY KEY,
+                              ward_id               BIGINT NOT NULL,
+                              report_date           DATE NOT NULL,
+                              mood_status           VARCHAR(20) NULL,
+                              steps                 INT NULL,
+                              health_summary        VARCHAR(255) NULL,
+                              medication_rate       DOUBLE NULL,
+                              is_delivered          BOOLEAN NOT NULL DEFAULT FALSE,
+                              generated_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                              FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE,
+                              UNIQUE KEY unique_ward_report_date (ward_id, report_date)
+);
+
+-- ===========================================================
+-- daily_report_health_detail 테이블
+-- ===========================================================
+CREATE TABLE daily_report_health_detail (
+                                            detail_id        BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                            daily_report_id  BIGINT NOT NULL,
+                                            disease_id       BIGINT NOT NULL,
+                                            avg_value        DOUBLE NOT NULL,
+                                            FOREIGN KEY (daily_report_id) REFERENCES daily_report(daily_report_id) ON DELETE CASCADE,
+                                            FOREIGN KEY (disease_id) REFERENCES disease(disease_id) ON DELETE CASCADE,
+                                            UNIQUE KEY unique_report_disease (daily_report_id, disease_id)
 );
 
 -- ===========================================================
