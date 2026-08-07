@@ -41,4 +41,13 @@ public class MemberController {
             @AuthenticationPrincipal Long memberId) {
         return ResponseEntity.ok(memberService.getProtectorCode(memberId));
     }
+
+    // 보호자 푸시 알림 on.off
+    @PostMapping("/push-toggle")
+    public ResponseEntity<Void> togglePush(
+            @AuthenticationPrincipal Long memberId
+    ) {
+        memberService.togglePush(memberId);
+        return  ResponseEntity.ok().build();
+    }
 }

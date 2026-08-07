@@ -460,4 +460,15 @@ public class MemberService {
                 .build();
 
     }
+
+    /**
+     * 푸시 알림 토글 메소드
+     */
+    @Transactional
+    public void togglePush(Long memverId){
+        Member member = memberRepository.findById(memverId)
+                .orElseThrow(()->new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        member.updatePush();
+    }
 }
