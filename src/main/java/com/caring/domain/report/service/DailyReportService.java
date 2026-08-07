@@ -8,6 +8,7 @@ import com.caring.domain.health.repository.StepRecordRepository;
 import com.caring.domain.member.entity.Disease;
 import com.caring.domain.member.entity.Member;
 import com.caring.domain.member.repository.MemberRepository;
+import com.caring.domain.notification.service.FcmService;
 import com.caring.domain.pill.entity.PillLog;
 import com.caring.domain.pill.repository.PillLogRepository;
 import com.caring.domain.report.dto.DailyReportResponseDto;
@@ -41,6 +42,7 @@ public class DailyReportService {
     private final PillLogRepository pillLogRepository;
     private final DailyReportHealthDetailRepository dailyReportHealthDetailRepository;
     private final ConnectionRepository connectionRepository;
+    private final FcmService fcmService;
 
     /**
      * 오늘자 mood/health/step 데이터를 모아 daily_report 한 건 생성
@@ -125,6 +127,22 @@ public class DailyReportService {
 
             dailyReportHealthDetailRepository.save(detail);
         });
+
+        // 1. ward를 담당하는 보호자 조회 (Connection에서 ward 기준 단독 조회)
+        Connection connection = connectionRepository.findByWard(ward)
+                .orElseThrow(() -> new IllegalArgumentException("연결되지 않은 대상자입니다"));
+
+        Member protector = connection.getProtector();
+
+        // 2. FCM 발송
+        fcmService.sendNotification(
+                protector,
+                "오늘의 리포트가 도착했어요",
+                ward.getName() + " 어르신의 오늘 리포트를 확인해보세요"
+        );
+
+        // 3. 발송 표시
+        dailyReport.markAsDelivered();
 
     }
 
