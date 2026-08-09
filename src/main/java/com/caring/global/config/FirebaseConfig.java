@@ -1,16 +1,24 @@
 package com.caring.global.config;
 
+import com.google.cloud.storage.Bucket;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import com.google.firebase.cloud.StorageClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Configuration
 public class FirebaseConfig {
+
+    @Value("${firebase.storage-bucket}")
+    private String storageBucket;
 
     // firebase 초기화 메소드
     // 서버가 FCM으로 알림 보내려면 파이어베이스한테 우리 서버를 인증해야함 !
@@ -18,14 +26,19 @@ public class FirebaseConfig {
     public FirebaseApp  initializeFirebase() throws IOException{ // 파일 읽다 오류 나는 것 방지
 
         // 인증되어있는 JSON 파일 읽기
-        FileInputStream serviceAccount =
-                new FileInputStream("src/main/resources/firebase-service-account.json");
+        InputStream serviceAccount = new ClassPathResource("firebase-service-account.json").getInputStream();
 
         // Firebase 연결 설정
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount)) // json 파일로 인증 정보 만들기
+                .setStorageBucket(storageBucket)
                 .build();
 
          return FirebaseApp.initializeApp(options); // firebase 초기화!
+    }
+
+    @Bean
+    public Bucket fireabaseStorageBucket(FirebaseApp firebaseApp) {
+        return StorageClient.getInstance(firebaseApp).bucket();
     }
 }
