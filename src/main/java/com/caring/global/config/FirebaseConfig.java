@@ -8,9 +8,11 @@ import com.google.firebase.cloud.StorageClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Configuration
 public class FirebaseConfig {
@@ -24,8 +26,7 @@ public class FirebaseConfig {
     public FirebaseApp  initializeFirebase() throws IOException{ // 파일 읽다 오류 나는 것 방지
 
         // 인증되어있는 JSON 파일 읽기
-        FileInputStream serviceAccount =
-                new FileInputStream("src/main/resources/firebase-service-account.json");
+        InputStream serviceAccount = new ClassPathResource("firebase-service-account.json").getInputStream();
 
         // Firebase 연결 설정
         FirebaseOptions options = FirebaseOptions.builder()

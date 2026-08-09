@@ -26,7 +26,7 @@ public class VoiceFileService {
 
         blob.createAcl(Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
 
-        return String.format("http://stoage.googleapis.com/%s/%s",
+        return String.format("https://storage.googleapis.com/%s/%s",
                 firebaseStorageBucket.getName(), fileName);
     }
 }

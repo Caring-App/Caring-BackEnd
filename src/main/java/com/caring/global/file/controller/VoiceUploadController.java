@@ -19,7 +19,7 @@ import java.util.Map;
 public class VoiceUploadController {
     private final VoiceFileService voiceFileService;
 
-    @PostMapping("/upload")
+    @PostMapping(value = "/upload", consumes = "multipart/form-data")
     public ResponseEntity<Map<String, String>> uploadVoice(
             @AuthenticationPrincipal Long protectorId,
             @RequestParam("file") MultipartFile file) throws IOException {
