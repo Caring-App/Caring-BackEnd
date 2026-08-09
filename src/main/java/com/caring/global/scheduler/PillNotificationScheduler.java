@@ -69,6 +69,7 @@ public class PillNotificationScheduler {
                     Map<String, String> dataPayload = new HashMap<>();
                     dataPayload.put("alarmType", schedule.getAlarmType().name());
                     dataPayload.put("voiceFileUrl", schedule.getVoiceFileUrl() != null ? schedule.getVoiceFileUrl() : "");
+                    dataPayload.put("ttsMessage", body);
                     dataPayload.put("pillLogId", pillLog.getPillLogId().toString());
 
                     try {
@@ -105,7 +106,7 @@ public class PillNotificationScheduler {
                 continue;
             }
 
-            // 4. 재알림 횟수가 3 이상이면 -> 보호자 알림 + escalate()
+            // 4. 재알림 횟수가 2 이상이면 -> 보호자 알림 + escalate()
             if (retryCount>=2) {
                 // 3번 재알림 완료 된 상태 -> 보호자에게 알림, 재시도 X
                 notifyProtector(schedule, pillLog);
@@ -124,6 +125,7 @@ public class PillNotificationScheduler {
                     Map<String, String> dataPayload = new HashMap<>();
                     dataPayload.put("alarmType", schedule.getAlarmType().name());
                     dataPayload.put("voiceFileUrl", schedule.getVoiceFileUrl() != null ? schedule.getVoiceFileUrl() : "");
+                    dataPayload.put("ttsMessage", body);
                     dataPayload.put("pillLogId", pillLog.getPillLogId().toString());
 
                     try {
