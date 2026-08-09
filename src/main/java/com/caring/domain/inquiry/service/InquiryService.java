@@ -1,6 +1,7 @@
 package com.caring.domain.inquiry.service;
 
 import com.caring.domain.inquiry.dto.InquiryCreateRequest;
+import com.caring.domain.inquiry.dto.InquiryResponseDto;
 import com.caring.domain.inquiry.entity.Inquiry;
 import com.caring.domain.inquiry.repository.InquiryRepository;
 import com.caring.domain.member.entity.Member;
@@ -8,6 +9,9 @@ import com.caring.domain.member.entity.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,5 +39,15 @@ public class InquiryService {
         inquiryRepository.save(inquiry);
 
         return inquiry.getInquiryId();
+    }
+
+    @Transactional(readOnly = true)
+    public List<InquiryResponseDto> getMyInquiries(Member member) {
+
+        List<Inquiry> inquiries = inquiryRepository.findByMemberOrderByCreatedAtDesc(member);
+
+        return inquiries.stream()
+                .map(InquiryResponseDto::from)
+                .collect(Collectors.toList());
     }
 }
