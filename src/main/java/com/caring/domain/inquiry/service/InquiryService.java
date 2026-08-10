@@ -4,6 +4,7 @@ import com.caring.domain.inquiry.dto.InquiryCreateRequest;
 import com.caring.domain.inquiry.dto.InquiryResponseDto;
 import com.caring.domain.inquiry.entity.Inquiry;
 import com.caring.domain.inquiry.repository.InquiryRepository;
+import com.caring.domain.member.entity.AuthLevel;
 import com.caring.domain.member.entity.Member;
 import com.caring.domain.member.entity.Role;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,7 @@ public class InquiryService {
         return inquiry.getInquiryId();
     }
 
+    // 내 문의 목록 조회
     @Transactional(readOnly = true)
     public List<InquiryResponseDto> getMyInquiries(Member member) {
 
@@ -49,5 +51,26 @@ public class InquiryService {
         return inquiries.stream()
                 .map(InquiryResponseDto::from)
                 .collect(Collectors.toList());
+    }
+
+    // 문의 상세 조회
+    @Transactional(readOnly = true)
+    public InquiryResponseDto getInquiryDetail(Member member, Long inquiryId) {
+
+        // 1 inquiryId로 Inquiry 조회
+        Inquiry inquiry = inquiryRepository.findById(inquiryId)
+                .orElseThrow(()->new IllegalArgumentException("조회할 문의가 없습니다."));
+
+        // 2 권한 체크: 본인 작성자이거나 && 관리자 role 인 경우만 통과
+
+        boolean isOwner = inquiry.getMember().getMemberId().equals(member.getMemberId());
+        boolean isAdmin = member.getAuthLevel() == AuthLevel.ADMIN;
+
+        if (!isOwner && !isAdmin) {
+            throw new IllegalArgumentException("조회 권한이 없습니다.");
+        }
+
+        // 3) Dto 변환해서 반환
+        return InquiryResponseDto.from(inquiry);
     }
 }
