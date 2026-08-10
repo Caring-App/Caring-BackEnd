@@ -50,4 +50,13 @@ public class MemberController {
         memberService.togglePush(memberId);
         return  ResponseEntity.ok().build();
     }
+
+    // 회원 탈퇴
+    @DeleteMapping
+    public ResponseEntity<Void> deleteMember(
+            @AuthenticationPrincipal Long memberId) {
+
+        memberService.deleteMember(memberId);
+        return ResponseEntity.ok().build();
+    }
 }
