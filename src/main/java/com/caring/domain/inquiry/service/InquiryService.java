@@ -8,6 +8,7 @@ import com.caring.domain.inquiry.repository.InquiryRepository;
 import com.caring.domain.member.entity.AuthLevel;
 import com.caring.domain.member.entity.Member;
 import com.caring.domain.member.entity.Role;
+import com.caring.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +21,15 @@ import java.util.stream.Collectors;
 public class InquiryService {
 
     private final InquiryRepository inquiryRepository;
+    private final MemberRepository memberRepository;   // ← 추가
+
 
     // 문의하기 생성
     @Transactional
-    public Long createInquiry(Member member, InquiryCreateRequest request) {
+    public Long createInquiry(Long memberId, InquiryCreateRequest request) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         // 1 role 체크: 보호자만 작성 가능
         if (member.getRole()!=Role.PROTECTOR) {
@@ -45,7 +51,10 @@ public class InquiryService {
 
     // 내 문의 목록 조회
     @Transactional(readOnly = true)
-    public List<InquiryResponseDto> getMyInquiries(Member member) {
+    public List<InquiryResponseDto> getMyInquiries(Long memberId) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         List<Inquiry> inquiries = inquiryRepository.findByMemberOrderByCreatedAtDesc(member);
 
@@ -56,7 +65,10 @@ public class InquiryService {
 
     // 문의 상세 조회
     @Transactional(readOnly = true)
-    public InquiryResponseDto getInquiryDetail(Member member, Long inquiryId) {
+    public InquiryResponseDto getInquiryDetail(Long memberId, Long inquiryId) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         // 1 inquiryId로 Inquiry 조회
         Inquiry inquiry = inquiryRepository.findById(inquiryId)
@@ -77,7 +89,10 @@ public class InquiryService {
 
     // 관리자 답변 등록
     @Transactional
-    public void answerInquiry(Member member, Long inquiryId, InquiryAnswerRequest request) {
+    public void answerInquiry(Long memberId, Long inquiryId, InquiryAnswerRequest request) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         // 1 관리자 권한 체크
         if (member.getAuthLevel()!=AuthLevel.ADMIN) {
