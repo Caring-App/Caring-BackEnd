@@ -1,5 +1,7 @@
 package com.caring.domain.member.service;
 
+import com.caring.domain.connection.entity.Connection;
+import com.caring.domain.connection.repository.ConnectionRepository;
 import com.caring.domain.member.dto.*;
 import com.caring.domain.member.entity.*;
 import com.caring.domain.member.repository.DiseaseRepository;
@@ -32,6 +34,7 @@ public class MemberService {
     private final Map<String, SmsVerification> smsVerificationStorage = new ConcurrentHashMap<>();
     private final SocialLoginService socialLoginService;
     private final ReportSettingService reportSettingService;
+    private final ConnectionRepository connectionRepository;
 
 
     private static class SmsVerification {
@@ -470,5 +473,32 @@ public class MemberService {
                 .orElseThrow(()->new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         member.updatePush();
+    }
+
+    /**
+     * 회원 탈퇴
+     */
+    @Transactional
+    public void deleteMember(Long memberId) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        if (member.getRole() == Role.PROTECTOR) {
+            // 1 보호자와 연결된 모든 Connection 조회
+            List<Connection> connections = connectionRepository.findByProtector(member);
+
+            // 2 각 connection의 ward를 전부 삭제
+            for (Connection connection : connections) {
+                memberRepository.delete(connection.getWard());
+            }
+
+            // 3) 보호자 본인 삭제
+            memberRepository.delete(member);
+
+        } else {
+            // WARD: 본인만 삭제 -> CASCADE로 connection 및 나머지 데이터 자동 정리
+            memberRepository.delete(member);
+        }
     }
 }
