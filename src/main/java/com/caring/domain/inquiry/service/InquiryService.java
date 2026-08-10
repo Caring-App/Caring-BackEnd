@@ -1,5 +1,6 @@
 package com.caring.domain.inquiry.service;
 
+import com.caring.domain.inquiry.dto.InquiryAnswerRequest;
 import com.caring.domain.inquiry.dto.InquiryCreateRequest;
 import com.caring.domain.inquiry.dto.InquiryResponseDto;
 import com.caring.domain.inquiry.entity.Inquiry;
@@ -72,5 +73,23 @@ public class InquiryService {
 
         // 3) Dto 변환해서 반환
         return InquiryResponseDto.from(inquiry);
+    }
+
+    // 관리자 답변 등록
+    @Transactional
+    public void answerInquiry(Member member, Long inquiryId, InquiryAnswerRequest request) {
+
+        // 1 관리자 권한 체크
+        if (member.getAuthLevel()!=AuthLevel.ADMIN) {
+            throw new IllegalArgumentException("관리자만 접근 가능합니다");
+        }
+
+        // 2 inquiryId로 Inquiry 조회
+        Inquiry inquiry = inquiryRepository.findById(inquiryId)
+                .orElseThrow(() -> new IllegalArgumentException("답변할 문의가 없습니다."));
+
+        // 3 registerAnswer() 메소드 호출
+        inquiry.registerAnswer(request.getAnswer());
+
     }
 }
