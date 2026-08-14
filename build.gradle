@@ -52,6 +52,8 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'  // WebClient 사용을 위함
 
+	// Google Cloud Text-to-Speech
+	implementation 'com.google.cloud:google-cloud-texttospeech:2.42.0'
 }
 
 tasks.named('test') {
