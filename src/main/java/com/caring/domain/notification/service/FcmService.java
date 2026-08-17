@@ -1,5 +1,6 @@
 package com.caring.domain.notification.service;
 
+import com.caring.domain.member.entity.Member;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
@@ -50,6 +51,34 @@ public class FcmService {
             log.info("FCM 데이터 알림 전송 성공 : {}", response);
         } catch (FirebaseMessagingException e){
             log.error("FCM 데이터 알림 전송 실패 : {}", e.getMessage());
+        }
+    }
+
+    public void sendNotification(Member member, String title, String body){
+
+        // pushEnabled 꺼져있으면 스킵
+        if (!member.getPushEnabled()) {
+            return;
+        }
+
+
+        if (member.getFcmToken() == null || member.getFcmToken().isBlank() ) {
+            return;
+        }
+
+        Message message = Message.builder()
+                .setToken(member.getFcmToken())
+                .setNotification(Notification.builder()
+                        .setTitle(title)
+                        .setBody(body)
+                        .build())
+                .build();
+
+        try {
+            String response = FirebaseMessaging.getInstance().send(message);
+            log.info("FCM 알림 전송 성공 : {}", response);
+        } catch (FirebaseMessagingException e){
+            log.error("FCM 알림 전송 실패 : {}", e.getMessage());
         }
     }
 }

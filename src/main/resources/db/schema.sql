@@ -23,6 +23,7 @@ DROP TABLE IF EXISTS pill_log;
 DROP TABLE IF EXISTS pill_schedule;
 DROP TABLE IF EXISTS connection;
 DROP TABLE IF EXISTS member;
+DROP TABLE IF EXISTS inquiry;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -267,6 +268,21 @@ CREATE TABLE system_log (
                             reason        VARCHAR(255) NOT NULL,
                             occurred_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                             FOREIGN KEY (member_id) REFERENCES member(member_id) ON DELETE CASCADE
+);
+
+-- ===========================================================
+-- Inquiry 테이블 (마이페이지 - 문의하기)
+-- ===========================================================
+CREATE TABLE inquiry (
+                         inquiry_id    BIGINT AUTO_INCREMENT PRIMARY KEY,
+                         member_id     BIGINT NOT NULL,
+                         title         VARCHAR(255) NOT NULL,
+                         content       TEXT NOT NULL,
+                         answer        TEXT NULL,
+                         is_answered   BOOLEAN NOT NULL DEFAULT FALSE,
+                         created_at    DATETIME NOT NULL,
+                         answered_at   DATETIME NULL,
+                         FOREIGN KEY (member_id) REFERENCES member(member_id) ON DELETE CASCADE
 );
 
 -- ===========================================================

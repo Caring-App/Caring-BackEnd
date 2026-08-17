@@ -55,12 +55,16 @@ public class Member {
     @Column(name = "fcm_token")
     private String fcmToken;
 
+    @Column(name = "push_enabled", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
+    private Boolean pushEnabled = true; // 신규 가입 시 기본 켜짐
+
     public void updateFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
     }
 
     public void updatePassword(String password){ this.password =password; }
 
+    // 돌봄대상자 관리 - 돌봄대상자 정보 수정 메소드
     public void updateProfile(String nickname,
                               String name,
                               String phone,
@@ -69,5 +73,16 @@ public class Member {
         this.name = name;
         this.phone = phone;
         this.address = address;
+    }
+
+    // 마이페이지 - 개인 정보 수정 메소드
+    public void updateContact(String phone, String address){
+        this.phone = phone;
+        this.address = address;
+    }
+
+    // 마이페이지 - 알람 on/off
+    public void updatePush(){
+        this.pushEnabled=!pushEnabled;
     }
 }
