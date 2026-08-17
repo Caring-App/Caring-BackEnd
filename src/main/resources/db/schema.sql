@@ -253,9 +253,9 @@ CREATE TABLE setting (
                          member_id            BIGINT NOT NULL,
                          is_push_enabled      BOOLEAN NOT NULL DEFAULT TRUE,
                          is_location_agreed   BOOLEAN NOT NULL DEFAULT FALSE,
-                         font_size            INT NOT NULL DEFAULT 1,
+                         font_size            INT NOT NULL DEFAULT 2,
                          tts_rate             DOUBLE NOT NULL DEFAULT 1.0,
-                         FOREIGN KEY (member_id) REFERENCES member(member_id) ON DELETE CASCADE
+                         FOREIGN KEY (member_id) REFERENCES member (member_id) ON DELETE CASCADE
 );
 
 -- ===========================================================
