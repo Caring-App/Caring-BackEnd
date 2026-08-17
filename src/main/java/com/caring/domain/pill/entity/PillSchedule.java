@@ -45,6 +45,9 @@ public class PillSchedule {
     @Column(name = "voice_file_url", length = 500)
     private String voiceFileUrl;
 
+    @Column(name = "retry_voice_file_url", length = 500)
+    private String retryVoiceFileUrl;
+
     @Builder.Default
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
@@ -54,13 +57,15 @@ public class PillSchedule {
                                LocalTime takeTime,
                                Integer retryAlarm,
                                AlarmType alarmType,
-                               String voiceFileUrl) {
+                               String voiceFileUrl,
+                               String retryVoiceFileUrl) {
         this.pillName = pillName;
         this.takeDays = takeDays;
         this.takeTime = takeTime;
         this.retryAlarm = retryAlarm;
         this.alarmType = alarmType;
         this.voiceFileUrl = voiceFileUrl;
+        this.retryVoiceFileUrl = retryVoiceFileUrl;
     }
 
     public void toggleActiveStatus(boolean isActive) {
