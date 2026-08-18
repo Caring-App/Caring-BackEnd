@@ -9,6 +9,8 @@ import com.caring.domain.pill.entity.PillSchedule;
 import com.caring.domain.pill.entity.PillType;
 import com.caring.domain.pill.repository.PillLogRepository;
 import com.caring.domain.pill.repository.PillScheduleRepository;
+import com.caring.domain.setting.entity.WardSetting;
+import com.caring.domain.setting.repository.WardSettingRepository;
 import com.caring.global.common.AlarmType;
 import com.caring.global.common.AlarmValidationUtil;
 import com.caring.global.tts.service.TtsFileService;
@@ -31,6 +33,7 @@ public class PillScheduleService {
     private final MemberRepository memberRepository;
     private final ConnectionRepository connectionRepository;
     private final TtsFileService ttsFileService;
+    private final WardSettingRepository wardSettingRepository;
 
     private void validateProtectorOfWard(Long protectorId, Long wardId) {
         boolean isConnected = connectionRepository.existsByProtector_MemberIdAndWard_MemberId(protectorId, wardId);
@@ -139,7 +142,8 @@ public class PillScheduleService {
 
         if (requestDto.getAlarmType() == AlarmType.TTS) {
             String message = buildInitialPillMessage(ward, requestDto.getPillName());
-            return ttsFileService.synthesizeAndUpload(message);
+            double ttsRate = resolveTtsRate(ward);
+            return ttsFileService.synthesizeAndUpload(message, ttsRate);
         }
         return requestDto.getVoiceFileUrl();
     }
@@ -148,7 +152,8 @@ public class PillScheduleService {
     private String resolveRetryVoiceFileUrl(Member ward, PillScheduleRequestDto requestDto) {
         if(requestDto.getAlarmType() == AlarmType.TTS) {
             String message = buildRetryPillMessage(ward, requestDto.getPillName());
-            return ttsFileService.synthesizeAndUpload(message);
+            double ttsRate = resolveTtsRate(ward);
+            return ttsFileService.synthesizeAndUpload(message, ttsRate);
         }
         return requestDto.getVoiceFileUrl();
     }
@@ -161,5 +166,12 @@ public class PillScheduleService {
 
     private String buildRetryPillMessage(Member ward, PillType pillName) {
         return ward.getName() + " 어르신, 아직 " + pillName.getDescription() + "확인이 안됐어요. 다시 확인해주세요.";
+    }
+
+
+    private double resolveTtsRate(Member ward) {
+        return wardSettingRepository.findByMember(ward)
+                .map(WardSetting::getTtsRate)
+                .orElse(1.0);
     }
 }

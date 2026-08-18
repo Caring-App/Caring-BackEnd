@@ -39,7 +39,7 @@ public class GoogleTtsService {
         }
     }
 
-    public byte[] synthesize(String text) {
+    public byte[] synthesize(String text, double speakingRate) {
         SynthesisInput input = SynthesisInput.newBuilder()
                 .setText(text)
                 .build();
@@ -51,13 +51,14 @@ public class GoogleTtsService {
 
         AudioConfig audioConfig = AudioConfig.newBuilder()
                 .setAudioEncoding(AudioEncoding.MP3)
+                .setSpeakingRate(speakingRate)
                 .build();
 
         try {
             SynthesizeSpeechResponse response = client.synthesizeSpeech(input, voice, audioConfig);
             ByteString audioContents = response.getAudioContent();
 
-            log.info("[TTS 합성 완료] 텍스트 길이: {}자", text.length());
+            log.info("[TTS 합성 완료] 텍스트 길이: {}자, 속도: {}", text.length(), speakingRate);
             return audioContents.toByteArray();
         } catch (Exception e) {
             log.error("[TTS 합성 실패] 에러: {}", e.getMessage());

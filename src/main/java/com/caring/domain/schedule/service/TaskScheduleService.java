@@ -7,6 +7,8 @@ import com.caring.domain.schedule.dto.TaskScheduleRequestDto;
 import com.caring.domain.schedule.dto.TaskScheduleResponseDto;
 import com.caring.domain.schedule.entity.TaskSchedule;
 import com.caring.domain.schedule.repository.TaskScheduleRepository;
+import com.caring.domain.setting.entity.WardSetting;
+import com.caring.domain.setting.repository.WardSettingRepository;
 import com.caring.global.common.AlarmType;
 import com.caring.global.common.AlarmValidationUtil;
 import com.caring.global.tts.service.TtsFileService;
@@ -25,6 +27,7 @@ public class TaskScheduleService {
     private final MemberRepository memberRepository;
     private final ConnectionRepository connectionRepository;
     private final TtsFileService ttsFileService;
+    private final WardSettingRepository wardSettingRepository;
 
     private void validateProtectorOfWard(Long protectorId, Long wardId) {
         boolean isConnected = connectionRepository.existsByProtector_MemberIdAndWard_MemberId(protectorId, wardId);
@@ -114,7 +117,8 @@ public class TaskScheduleService {
             String message = (requestDto.getTtsMessage() != null && !requestDto.getTtsMessage().isBlank())
                     ? requestDto.getTtsMessage()
                     : buildTtsMessage(ward, requestDto);
-            return ttsFileService.synthesizeAndUpload(message);
+            double ttsRate = resolveTtsRate(ward);
+            return ttsFileService.synthesizeAndUpload(message,ttsRate);
         }
         return requestDto.getVoiceFileUrl();
     }
@@ -126,5 +130,12 @@ public class TaskScheduleService {
                 : "";
         return String.format("%s 어르신, %s%s 일정이 %s에 있어요.",
                 ward.getName(), requestDto.getTaskName(), location, requestDto.getTaskTime());
+    }
+
+
+    private double resolveTtsRate(Member ward) {
+        return wardSettingRepository.findByMember(ward)
+                .map(WardSetting::getTtsRate)
+                .orElse(1.0);
     }
 }
