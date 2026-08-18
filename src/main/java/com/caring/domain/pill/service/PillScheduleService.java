@@ -6,8 +6,12 @@ import com.caring.domain.member.repository.MemberRepository;
 import com.caring.domain.pill.dto.PillScheduleRequestDto;
 import com.caring.domain.pill.dto.PillScheduleResponseDto;
 import com.caring.domain.pill.entity.PillSchedule;
+import com.caring.domain.pill.entity.PillType;
 import com.caring.domain.pill.repository.PillLogRepository;
 import com.caring.domain.pill.repository.PillScheduleRepository;
+import com.caring.global.common.AlarmType;
+import com.caring.global.common.AlarmValidationUtil;
+import com.caring.global.tts.service.TtsFileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -26,6 +30,7 @@ public class PillScheduleService {
     private final PillLogRepository pillLogRepository;
     private final MemberRepository memberRepository;
     private final ConnectionRepository connectionRepository;
+    private final TtsFileService ttsFileService;
 
     private void validateProtectorOfWard(Long protectorId, Long wardId) {
         boolean isConnected = connectionRepository.existsByProtector_MemberIdAndWard_MemberId(protectorId, wardId);
@@ -42,6 +47,9 @@ public class PillScheduleService {
         Member ward = memberRepository.findById(requestDto.getWardId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 돌봄대상자가 존재하지 않습니다. ID = " + requestDto.getWardId()));
 
+        String voiceFileUrl = resolveVoiceFileUrl(ward, requestDto);
+        String retryVoiceFileUrl = resolveRetryVoiceFileUrl(ward, requestDto);
+
         PillSchedule pillSchedule = PillSchedule.builder()
                 .ward(ward)
                 .pillName(requestDto.getPillName())
@@ -49,7 +57,8 @@ public class PillScheduleService {
                 .takeTime(requestDto.getTakeTime())
                 .retryAlarm(requestDto.getRetryAlarm())
                 .alarmType(requestDto.getAlarmType())
-                .voiceFileUrl(requestDto.getVoiceFileUrl())
+                .voiceFileUrl(voiceFileUrl)
+                .retryVoiceFileUrl(retryVoiceFileUrl)
                 .isActive(requestDto.isActive())
                 .build();
 
@@ -76,13 +85,17 @@ public class PillScheduleService {
 
         validateProtectorOfWard(protectorId, pillSchedule.getWard().getMemberId());
 
+        String voiceFileUrl = resolveVoiceFileUrl(pillSchedule.getWard(), requestDto);
+        String retryVoiceFileUrl = resolveRetryVoiceFileUrl(pillSchedule.getWard(), requestDto);
+
         pillSchedule.updateSchedule(
                 requestDto.getPillName(),
                 requestDto.getTakeDays(),
                 requestDto.getTakeTime(),
                 requestDto.getRetryAlarm(),
                 requestDto.getAlarmType(),
-                requestDto.getVoiceFileUrl()
+                voiceFileUrl,
+                retryVoiceFileUrl
         );
 
         pillLogRepository.findByPillScheduleAndRecordDate(pillSchedule, LocalDate.now())
@@ -118,5 +131,35 @@ public class PillScheduleService {
         validateProtectorOfWard(protectorId, pillSchedule.getWard().getMemberId());
 
         pillScheduleRepository.delete(pillSchedule);
+    }
+
+
+    private String resolveVoiceFileUrl(Member ward, PillScheduleRequestDto requestDto) {
+        AlarmValidationUtil.validateVoiceSetting(requestDto.getAlarmType(), requestDto.getVoiceFileUrl());
+
+        if (requestDto.getAlarmType() == AlarmType.TTS) {
+            String message = buildInitialPillMessage(ward, requestDto.getPillName());
+            return ttsFileService.synthesizeAndUpload(message);
+        }
+        return requestDto.getVoiceFileUrl();
+    }
+
+
+    private String resolveRetryVoiceFileUrl(Member ward, PillScheduleRequestDto requestDto) {
+        if(requestDto.getAlarmType() == AlarmType.TTS) {
+            String message = buildRetryPillMessage(ward, requestDto.getPillName());
+            return ttsFileService.synthesizeAndUpload(message);
+        }
+        return requestDto.getVoiceFileUrl();
+    }
+
+
+    private String buildInitialPillMessage(Member ward, PillType pillName) {
+        return ward.getName() + " 어르신, " + pillName.getDescription() + " 드실 시간입니다! 잊지 말고 챙겨 드세요.";
+    }
+
+
+    private String buildRetryPillMessage(Member ward, PillType pillName) {
+        return ward.getName() + " 어르신, 아직 " + pillName.getDescription() + "확인이 안됐어요. 다시 확인해주세요.";
     }
 }
