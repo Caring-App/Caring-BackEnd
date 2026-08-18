@@ -6,6 +6,8 @@ import com.caring.domain.connection.repository.ConnectionRepository;
 import com.caring.domain.member.entity.Member;
 import com.caring.domain.member.repository.MemberDiseaseRepository;
 import com.caring.domain.member.repository.MemberRepository;
+import com.caring.domain.setting.entity.WardSetting;
+import com.caring.domain.setting.repository.WardSettingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +24,7 @@ public class ConnectionService {
     private final ConnectionRepository connectionRepository;
     //고유코드로 대상자 찾을 때 필요
     private final MemberRepository memberRepository;
-    private final MemberDiseaseRepository memberDiseaseRepository;
+    private final WardSettingRepository wardSettingRepository;
 
     // 보호자와 돌봄대상자 연결하는 메소드
     @Transactional // DB 작업 오류시 롤백
@@ -65,13 +67,20 @@ public class ConnectionService {
 
         return connectionRepository.findByProtector(protector)
                 .stream()
-                .map(connection -> WardSummaryResponseDto.builder()
-                        .connectionId(connection.getConnectionId())
-                        .wardId(connection.getWard().getMemberId())
-                        .wardName(connection.getWard().getName())
-                        .nickname(connection.getWard().getNickname())
-                        .linkedAt(connection.getLinkedAt())
-                        .build())
+                .map(connection -> {
+                    Member ward = connection.getWard();
+                    WardSetting setting = wardSettingRepository.findByMember(ward).orElse(null);
+
+                    return WardSummaryResponseDto.builder()
+                            .connectionId(connection.getConnectionId())
+                            .wardId(ward.getMemberId())
+                            .wardName(ward.getName())
+                            .nickname(ward.getNickname())
+                            .linkedAt(connection.getLinkedAt())
+                            .fontSize(setting != null ? setting.getFontSize() : null)
+                            .ttsRate(setting != null ? setting.getTtsRate() : null)
+                            .build();
+                        })
                 .toList();
     }
 
@@ -83,21 +92,12 @@ public class ConnectionService {
 
         Member ward = connection.getWard();
 
-        List<String> diseases = memberDiseaseRepository.findByWard_MemberId(wardId)
-                .stream()
-                .map(memberDisease -> memberDisease.getDisease().getDiseaseName())
-                .toList();
-
         return WardDetailResponseDto.builder()
-                .connectionId(connection.getConnectionId())
                 .wardId(ward.getMemberId())
                 .wardName(ward.getName())
                 .nickname(ward.getNickname())
                 .phone(ward.getPhone())
-                .birthDate(ward.getBirthDate())
                 .address(ward.getAddress())
-                .diseases(diseases)
-                .linkedAt(connection.getLinkedAt())
                 .build();
     }
 
@@ -116,21 +116,12 @@ public class ConnectionService {
                    requestDto.getAddress()
            );
 
-           List<String> diseases = memberDiseaseRepository.findByWard_MemberId(wardId)
-                   .stream()
-                   .map(memberDisease -> memberDisease.getDisease().getDiseaseName())
-                   .toList();
-
         return WardDetailResponseDto.builder()
-                .connectionId(connection.getConnectionId())
                 .wardId(ward.getMemberId())
                 .wardName(ward.getName())
                 .nickname(ward.getNickname())
                 .phone(ward.getPhone())
-                .birthDate(ward.getBirthDate())
                 .address(ward.getAddress())
-                .diseases(diseases)
-                .linkedAt(connection.getLinkedAt())
                 .build();
     }
 }

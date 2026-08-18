@@ -1,5 +1,6 @@
 package com.caring.domain.connection.dto;
 
+import com.caring.global.common.FontSize;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,4 +14,6 @@ public class WardSummaryResponseDto {
     private String wardName;
     private String nickname;
     private LocalDateTime linkedAt;
+    private FontSize fontSize;
+    private Double ttsRate;
 }
