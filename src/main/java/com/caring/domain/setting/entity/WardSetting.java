@@ -11,22 +11,16 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "setting")
-public class Setting {
+@Table(name = "ward_setting")
+public class WardSetting {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "setting_id")
-    private Long settingId;
+    @Column(name = "ward_setting_id")
+    private Long wardSettingId;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false, unique = true)
     private Member member;
-
-    @Column(name = "is_push_enabled", nullable = false)
-    private boolean isPushEnabled;
-
-    @Column(name = "is_location_agreed", nullable = false)
-    private boolean isLocationAgreed;
 
     @Column(name = "font_size", nullable = false)
     private FontSize fontSize;
@@ -35,14 +29,10 @@ public class Setting {
     private Double ttsRate;
 
     @Builder
-    public Setting(Member member,
-                   boolean isPushEnabled,
-                   boolean isLocationAgreed,
-                   FontSize fontSize,
-                   Double ttsRate) {
+    public WardSetting(Member member,
+                       FontSize fontSize,
+                       Double ttsRate) {
         this.member = member;
-        this.isPushEnabled = isPushEnabled;
-        this.isLocationAgreed = isLocationAgreed;
         this.fontSize = fontSize;
         this.ttsRate = ttsRate;
     }

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class SettingRequestDto {
+public class WardSettingRequestDto {
     @NotNull
     private FontSize fontSize;
 

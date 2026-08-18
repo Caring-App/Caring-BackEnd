@@ -16,7 +16,7 @@ DROP TABLE IF EXISTS report_setting;
 DROP TABLE IF EXISTS mood_check;
 DROP TABLE IF EXISTS member_disease;
 DROP TABLE IF EXISTS disease;
-DROP TABLE IF EXISTS setting;
+DROP TABLE IF EXISTS wardSetting;
 DROP TABLE IF EXISTS place_info;
 DROP TABLE IF EXISTS task_schedule;
 DROP TABLE IF EXISTS pill_log;
@@ -246,13 +246,11 @@ CREATE TABLE notification_log (
 );
 
 -- ===========================================================
--- Setting 테이블
+-- WardSetting 테이블
 -- ===========================================================
-CREATE TABLE setting (
-                         setting_id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE ward_setting (
+                         ward_setting_id           BIGINT AUTO_INCREMENT PRIMARY KEY,
                          member_id            BIGINT NOT NULL,
-                         is_push_enabled      BOOLEAN NOT NULL DEFAULT TRUE,
-                         is_location_agreed   BOOLEAN NOT NULL DEFAULT FALSE,
                          font_size            INT NOT NULL DEFAULT 2,
                          tts_rate             DOUBLE NOT NULL DEFAULT 1.0,
                          FOREIGN KEY (member_id) REFERENCES member (member_id) ON DELETE CASCADE
