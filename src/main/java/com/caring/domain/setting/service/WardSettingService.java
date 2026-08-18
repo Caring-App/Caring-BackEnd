@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class SettingService {
+public class WardSettingService {
     private final WardSettingRepository wardSettingRepository;
     private final ConnectionRepository connectionRepository;
 
@@ -22,8 +22,6 @@ public class SettingService {
     public void createDefaultSetting(Member ward) {
         WardSetting wardSetting = WardSetting.builder()
                 .member(ward)
-                .isPushEnabled(true)
-                .isLocationAgreed(true)
                 .fontSize(FontSize.MEDIUM)
                 .ttsRate(1.0)
                 .build();
