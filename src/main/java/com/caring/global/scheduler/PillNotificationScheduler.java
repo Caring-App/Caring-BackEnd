@@ -122,9 +122,13 @@ public class PillNotificationScheduler {
                     String title = "💊 복약  재알림";
                     String body = wardName + " 어르신, 아직 [" + pillLabel + "] 확인이 안됐어요. 다시 확인해주세요!";
 
+                    String voiceFileUrl = schedule.getRetryVoiceFileUrl() != null
+                            ? schedule.getRetryVoiceFileUrl()
+                            : (schedule.getVoiceFileUrl() != null ? schedule.getVoiceFileUrl() : "");
+
                     Map<String, String> dataPayload = new HashMap<>();
                     dataPayload.put("alarmType", schedule.getAlarmType().name());
-                    dataPayload.put("voiceFileUrl", schedule.getVoiceFileUrl() != null ? schedule.getVoiceFileUrl() : "");
+                    dataPayload.put("voiceFileUrl", voiceFileUrl);
                     dataPayload.put("ttsMessage", body);
                     dataPayload.put("pillLogId", pillLog.getPillLogId().toString());
 

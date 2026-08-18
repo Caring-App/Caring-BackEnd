@@ -70,6 +70,7 @@ CREATE TABLE pill_schedule (
                                retry_alarm       INT NOT NULL DEFAULT 10,
                                alarm_type        VARCHAR(50) NOT NULL DEFAULT 'TTS',
                                voice_file_url    VARCHAR(500) NULL,
+                               retry_voice_file_url    VARCHAR(500) NULL,
                                is_active         BOOLEAN NOT NULL DEFAULT TRUE,
                                FOREIGN KEY (ward_id) REFERENCES member(member_id) ON DELETE CASCADE
 );

@@ -7,6 +7,9 @@ import com.caring.domain.schedule.dto.TaskScheduleRequestDto;
 import com.caring.domain.schedule.dto.TaskScheduleResponseDto;
 import com.caring.domain.schedule.entity.TaskSchedule;
 import com.caring.domain.schedule.repository.TaskScheduleRepository;
+import com.caring.global.common.AlarmType;
+import com.caring.global.common.AlarmValidationUtil;
+import com.caring.global.tts.service.TtsFileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,7 @@ public class TaskScheduleService {
     private final TaskScheduleRepository taskScheduleRepository;
     private final MemberRepository memberRepository;
     private final ConnectionRepository connectionRepository;
+    private final TtsFileService ttsFileService;
 
     private void validateProtectorOfWard(Long protectorId, Long wardId) {
         boolean isConnected = connectionRepository.existsByProtector_MemberIdAndWard_MemberId(protectorId, wardId);
@@ -36,6 +40,8 @@ public class TaskScheduleService {
         Member ward = memberRepository.findById(wardId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 돌봄대상자가 존재하지 않습니다. ID = " + wardId));
 
+        String voiceFileUrl = resolveVoiceFileUrl(ward, requestDto);
+
         TaskSchedule taskSchedule = TaskSchedule.builder()
                 .ward(ward)
                 .taskName(requestDto.getTaskName())
@@ -45,7 +51,7 @@ public class TaskScheduleService {
                 .ttsVoiceTime(requestDto.getTtsVoiceTime())
                 .ttsMessage(requestDto.getTtsMessage())
                 .alarmType(requestDto.getAlarmType())
-                .voiceFileUrl(requestDto.getVoiceFileUrl())
+                .voiceFileUrl(voiceFileUrl)
                 .placeId(requestDto.getPlaceId())
                 .build();
 
@@ -72,6 +78,8 @@ public class TaskScheduleService {
 
         validateProtectorOfWard(protectorId, taskSchedule.getWard().getMemberId());
 
+        String voiceFileUrl = resolveVoiceFileUrl(taskSchedule.getWard(), requestDto);
+
         taskSchedule.updateTask(
                 requestDto.getTaskName(),
                 requestDto.getLocationName(),
@@ -80,7 +88,7 @@ public class TaskScheduleService {
                 requestDto.getTtsVoiceTime(),
                 requestDto.getTtsMessage(),
                 requestDto.getAlarmType(),
-                requestDto.getVoiceFileUrl(),
+                voiceFileUrl,
                 requestDto.getPlaceId()
         );
 
@@ -96,5 +104,27 @@ public class TaskScheduleService {
         validateProtectorOfWard(protectorId, taskSchedule.getWard().getMemberId());
 
         taskScheduleRepository.delete(taskSchedule);
+    }
+
+
+    private String resolveVoiceFileUrl(Member ward, TaskScheduleRequestDto requestDto) {
+        AlarmValidationUtil.validateVoiceSetting(requestDto.getAlarmType(), requestDto.getVoiceFileUrl());
+
+        if(requestDto.getAlarmType() == AlarmType.TTS) {
+            String message = (requestDto.getTtsMessage() != null && !requestDto.getTtsMessage().isBlank())
+                    ? requestDto.getTtsMessage()
+                    : buildTtsMessage(ward, requestDto);
+            return ttsFileService.synthesizeAndUpload(message);
+        }
+        return requestDto.getVoiceFileUrl();
+    }
+
+
+    private String buildTtsMessage(Member ward, TaskScheduleRequestDto requestDto) {
+        String location = (requestDto.getLocationName() != null && !requestDto.getLocationName().isBlank())
+                ? " (" + requestDto.getLocationName() + ") "
+                : "";
+        return String.format("%s 어르신, %s%s 일정이 %s에 있어요.",
+                ward.getName(), requestDto.getTaskName(), location, requestDto.getTaskTime());
     }
 }
