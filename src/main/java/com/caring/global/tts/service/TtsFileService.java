@@ -16,8 +16,8 @@ public class TtsFileService {
     private final GoogleTtsService googleTtsService;
     private final Bucket firebaseStorageBucket;
 
-    public String synthesizeAndUpload(String text) {
-        byte[] audioBytes = googleTtsService.synthesize(text);
+    public String synthesizeAndUpload(String text, double speakingRate) {
+        byte[] audioBytes = googleTtsService.synthesize(text, speakingRate);
 
         String fileName = "tts/" + UUID.randomUUID() + ".mp3";
         Blob blob = firebaseStorageBucket.create(fileName, audioBytes, "audio/mpeg");

@@ -10,13 +10,9 @@ import java.util.List;
 @Getter
 @Builder
 public class WardDetailResponseDto {
-    private Long connectionId;
     private Long wardId;
     private String wardName;
     private String nickname;
     private String phone;
-    private LocalDate birthDate;
     private String address;
-    private List<String> diseases;
-    private LocalDateTime linkedAt;
 }

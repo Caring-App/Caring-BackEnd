@@ -38,6 +38,7 @@ public class Member {
     @Column(nullable = false)
     private Role role;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'LOCAL'")
     private Provider provider = Provider.LOCAL;
@@ -48,6 +49,7 @@ public class Member {
     @Column(name = "protector_code",unique = true)
     private String protectorCode;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "auth_level",nullable = false, columnDefinition = "ENUM('ADMIN', 'USER') DEFAULT 'USER'")
     private AuthLevel authLevel = AuthLevel.USER;
@@ -55,6 +57,7 @@ public class Member {
     @Column(name = "fcm_token")
     private String fcmToken;
 
+    @Builder.Default
     @Column(name = "push_enabled", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
     private Boolean pushEnabled = true; // 신규 가입 시 기본 켜짐
 
