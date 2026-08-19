@@ -4,7 +4,6 @@ import com.caring.domain.member.entity.Provider;
 import com.caring.domain.member.entity.Role;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -18,7 +17,6 @@ public class SocialRegisterRequestDto {
     private Role role; // PROTECTOR 또는 WARD
     private String name;
     private String phone;
-    private LocalDate birthDate;
     private String address;
     private List<String> diseases; // WARD일 때만 사용, PROTECTOR면 그냥 null
 }

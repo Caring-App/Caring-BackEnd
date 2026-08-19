@@ -36,7 +36,6 @@ CREATE TABLE member (
                         password        VARCHAR(255) NULL,
                         name            VARCHAR(50) NOT NULL,
                         nickname        VARCHAR(50) NULL,
-                        birth_date      DATE NOT NULL,
                         address         VARCHAR(255) NOT NULL,
                         role            ENUM('PROTECTOR', 'WARD') NOT NULL,
                         provider        VARCHAR(20) NOT NULL DEFAULT 'LOCAL',
