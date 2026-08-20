@@ -53,6 +53,7 @@ public class ConnectionService {
         // responseDto로 변환
         return ConnectionResponseDto.builder()
                 .connectionId(connection.getConnectionId())
+                .protectorName(protector.getName())
                 .wardName(ward.getName())
                 .linkedAt(connection.getLinkedAt())
                 .build();
