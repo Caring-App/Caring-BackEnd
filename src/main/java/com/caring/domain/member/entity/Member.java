@@ -3,8 +3,6 @@ package com.caring.domain.member.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
-
 @Entity
 @Getter
 @Builder
@@ -27,9 +25,6 @@ public class Member {
     private String name;
 
     private String nickname;
-
-    @Column(name = "birth_date", nullable = false)
-    private LocalDate birthDate;
 
     @Column(nullable = false)
     private String address;
