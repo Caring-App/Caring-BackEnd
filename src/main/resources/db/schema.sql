@@ -284,6 +284,17 @@ CREATE TABLE inquiry (
 );
 
 -- ===========================================================
+-- 정책 및 약관 테이블
+-- ===========================================================
+CREATE TABLE policy (
+                        policy_id   BIGINT AUTO_INCREMENT PRIMARY KEY,
+                        type        VARCHAR(50) NOT NULL UNIQUE,
+                        title       VARCHAR(100) NOT NULL,
+                        content     TEXT NOT NULL,
+                        updated_at  DATETIME NOT NULL
+);
+
+-- ===========================================================
 -- 초기 질병 데이터 삽입 (Insert)
 -- ===========================================================
 INSERT INTO disease (disease_name) VALUES
