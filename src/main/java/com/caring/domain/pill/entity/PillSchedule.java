@@ -68,6 +68,11 @@ public class PillSchedule {
         this.retryVoiceFileUrl = retryVoiceFileUrl;
     }
 
+    public void updateVoiceFiles(String voiceFileUrl, String retryVoiceFileUrl) {
+        this.voiceFileUrl = voiceFileUrl;
+        this.retryVoiceFileUrl = retryVoiceFileUrl;
+    }
+
     public void toggleActiveStatus(boolean isActive) {
         this.isActive = isActive;
     }

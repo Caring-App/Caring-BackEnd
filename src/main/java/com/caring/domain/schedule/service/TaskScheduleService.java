@@ -110,6 +110,24 @@ public class TaskScheduleService {
     }
 
 
+    @Transactional
+    public void resynthesizeAllForWard(Member ward, double newTtsRate) {
+        List<TaskSchedule> schedules = taskScheduleRepository.findByWard_MemberId(ward.getMemberId());
+
+        for(TaskSchedule schedule : schedules) {
+            if(schedule.getAlarmType() != AlarmType.TTS) {
+                continue;
+            }
+
+            String message = (schedule.getTtsMessage() != null && !schedule.getTtsMessage().isBlank())
+                    ? schedule.getTtsMessage()
+                    : buildTtsMessageFromSchedule(ward, schedule);
+
+            String newVoiceFileUrl = ttsFileService.synthesizeAndUpload(message, newTtsRate);
+            schedule.updateVoiceFile(newVoiceFileUrl);
+        }
+    }
+
     private String resolveVoiceFileUrl(Member ward, TaskScheduleRequestDto requestDto) {
         AlarmValidationUtil.validateVoiceSetting(requestDto.getAlarmType(), requestDto.getVoiceFileUrl());
 
@@ -137,5 +155,13 @@ public class TaskScheduleService {
         return wardSettingRepository.findByMember(ward)
                 .map(WardSetting::getTtsRate)
                 .orElse(1.0);
+    }
+
+
+    private String buildTtsMessageFromSchedule(Member ward, TaskSchedule schedule) {
+        String location = (schedule.getLocationName() != null && !schedule.getLocationName().isBlank())
+                ? " (" + schedule.getLocationName() + ")" : "";
+        return ward.getName() + " 어르신, " + schedule.getTaskName() + location
+                + " 일정이 " + schedule.getTaskTime() + "에 있어요.";
     }
 }

@@ -137,6 +137,26 @@ public class PillScheduleService {
     }
 
 
+    // 돌봄대상자의 설정된 모든 복약 스케줄 TTS 속도를 수정
+    @Transactional
+    public void resynthesizeAllForWard(Member ward, double newTtsRate) {
+        List<PillSchedule> schedules = pillScheduleRepository.findByWardMemberId(ward.getMemberId());
+
+        for(PillSchedule schedule : schedules) {
+            if(schedule.getAlarmType() != AlarmType.TTS) {
+                continue;
+            }
+
+            String newVoiceFileUrl = ttsFileService.synthesizeAndUpload(
+                    buildInitialPillMessage(ward, schedule.getPillName()), newTtsRate);
+            String newRetryVoiceFileUrl = ttsFileService.synthesizeAndUpload(
+                    buildRetryPillMessage(ward, schedule.getPillName()), newTtsRate);
+
+            schedule.updateVoiceFiles(newVoiceFileUrl, newRetryVoiceFileUrl);
+        }
+    }
+
+
     private String resolveVoiceFileUrl(Member ward, PillScheduleRequestDto requestDto) {
         AlarmValidationUtil.validateVoiceSetting(requestDto.getAlarmType(), requestDto.getVoiceFileUrl());
 

@@ -71,4 +71,8 @@ public class TaskSchedule {
         this.voiceFileUrl = voiceFileUrl;
         this.placeId = placeId;
     }
+
+    public void updateVoiceFile(String voiceFileUrl) {
+        this.voiceFileUrl = voiceFileUrl;
+    }
 }
