@@ -13,6 +13,7 @@ public class ConnectionResponseDto {
     // 연결 성공 시 응답을 담음
 
     private Long connectionId; // 연결 ID
+    private String protectorName; // 보호자 이름
     private String wardName; // 대상자 이름
     private LocalDateTime linkedAt; // 연결된 시간
 
