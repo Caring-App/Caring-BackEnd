@@ -83,4 +83,9 @@ public class Member {
     public void updatePush(){
         this.pushEnabled=!pushEnabled;
     }
+
+    // 마이페이지 - 전화번호 변경
+    public void updatePhone(String phone){
+        this.phone=phone;
+    }
 }
