@@ -502,4 +502,37 @@ public class MemberService {
             memberRepository.delete(member);
         }
     }
+
+    // 마이페이지 - 전화번호 변경
+    @Transactional
+    public void changePhone(Long memberId, PhoneChangeRequestDto requestDto){
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(()->new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        String newPhone = requestDto.getNewPhone();
+
+        // sms 인증 검증
+        SmsVerification verification = smsVerificationStorage.get(newPhone);
+
+        if(verification == null
+                || !verification.verified
+                || verification.isExpired()
+                || !verification.code.equals(requestDto.getAuthNumber())){
+            throw new IllegalArgumentException("휴대폰 인증이 완료되지 않았습니다.");
+        }
+
+        // 인증 정보 제거
+        smsVerificationStorage.remove(requestDto.getNewPhone());
+
+        // 기존 번호와 다르면 중복 체크
+        if (!member.getPhone().equals(newPhone)) {
+            memberRepository.findByPhone(newPhone)
+                    .ifPresent(m -> {
+                        throw new IllegalArgumentException("이미 사용 중인 전화번호입니다.");
+                    });
+        }
+
+        // 전화번호 변경
+        member.updatePhone(newPhone);
+    }
 }
