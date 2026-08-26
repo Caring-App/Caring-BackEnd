@@ -3,6 +3,7 @@ package com.caring.domain.member.controller;
 import com.caring.domain.member.dto.FcmTokenRequestDto;
 import com.caring.domain.member.dto.LoginResponseDto;
 import com.caring.domain.member.dto.MyPageUpdateRequest;
+import com.caring.domain.member.dto.PhoneChangeRequestDto;
 import com.caring.domain.member.dto.ProtectorCodeResponseDto;
 import com.caring.domain.member.entity.Member;
 import com.caring.domain.member.service.MemberService;
@@ -57,6 +58,16 @@ public class MemberController {
             @AuthenticationPrincipal Long memberId) {
 
         memberService.deleteMember(memberId);
+        return ResponseEntity.ok().build();
+    }
+
+    // 마이페이지 - 전화번호 변경 (SMS 인증 필수)
+    @PatchMapping("/phone")
+    public ResponseEntity<Void> changePhone(
+            @AuthenticationPrincipal Long memberId,
+            @RequestBody PhoneChangeRequestDto requestDto
+    ) {
+        memberService.changePhone(memberId, requestDto);
         return ResponseEntity.ok().build();
     }
 }
