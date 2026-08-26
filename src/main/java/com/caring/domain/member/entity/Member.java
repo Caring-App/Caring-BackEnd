@@ -74,8 +74,7 @@ public class Member {
     }
 
     // 마이페이지 - 개인 정보 수정 메소드
-    public void updateContact(String phone, String address){
-        this.phone = phone;
+    public void updateAddress(String address){
         this.address = address;
     }
 
