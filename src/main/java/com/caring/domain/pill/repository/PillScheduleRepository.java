@@ -15,4 +15,6 @@ public interface PillScheduleRepository extends JpaRepository<PillSchedule, Long
 
     @Query("SELECT p FROM PillSchedule p JOIN FETCH p.ward WHERE p.isActive = true AND p.takeTime = :takeTime")
     List<PillSchedule> findActiveSchedulesByTime(@Param("takeTime") LocalTime takeTime);
+
+    List<PillSchedule> findByWard_MemberIdAndIsActiveTrue(Long wardId);
 }
