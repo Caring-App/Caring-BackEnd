@@ -29,6 +29,15 @@ public class Member {
     @Column(nullable = false)
     private String address;
 
+    @Column(name = "base_address", length = 255)
+    private String baseAddress;
+
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -66,11 +75,13 @@ public class Member {
     public void updateProfile(String nickname,
                               String name,
                               String phone,
-                              String address) {
+                              String address,
+                              String baseAddress) {
         this.nickname = nickname;
         this.name = name;
         this.phone = phone;
         this.address = address;
+        this.baseAddress = baseAddress;
     }
 
     // 마이페이지 - 개인 정보 수정 메소드
@@ -86,5 +97,10 @@ public class Member {
     // 마이페이지 - 전화번호 변경
     public void updatePhone(String phone){
         this.phone=phone;
+    }
+
+    public void updateCoordinates(Double latitude, Double longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 }

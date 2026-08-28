@@ -17,6 +17,7 @@ public class SocialRegisterRequestDto {
     private Role role; // PROTECTOR 또는 WARD
     private String name;
     private String phone;
-    private String address;
+    private String baseAddress;
+    private String detailAddress;
     private List<String> diseases; // WARD일 때만 사용, PROTECTOR면 그냥 null
 }

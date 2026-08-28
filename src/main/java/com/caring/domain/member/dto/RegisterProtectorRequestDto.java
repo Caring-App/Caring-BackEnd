@@ -12,5 +12,6 @@ public class RegisterProtectorRequestDto {
     private String authNumber;
     private String password;
     private String passwordCheck;
-    private String address;
+    private String baseAddress;
+    private String detailAddress;
 }
