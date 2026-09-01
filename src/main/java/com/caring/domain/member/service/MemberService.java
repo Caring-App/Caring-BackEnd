@@ -9,8 +9,10 @@ import com.caring.domain.member.repository.MemberDiseaseRepository;
 import com.caring.domain.member.repository.MemberRepository;
 import com.caring.domain.report.service.ReportSettingService;
 import com.caring.domain.setting.service.WardSettingService;
+import com.caring.global.geocoding.service.KakaoGeocodingService;
 import com.caring.global.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MemberService {
     private final ProtectorCodeService protectorCodeService;
     private final MemberRepository memberRepository;
@@ -37,6 +40,7 @@ public class MemberService {
     private final ReportSettingService reportSettingService;
     private final ConnectionRepository connectionRepository;
     private final WardSettingService wardSettingService;
+    private final KakaoGeocodingService kakaoGeocodingService;
 
 
     private static class SmsVerification {
@@ -114,7 +118,8 @@ public class MemberService {
                 .name(requestDto.getName())
                 .phone(requestDto.getPhone())
                 .password(passwordEncoder.encode(requestDto.getPassword()))
-                .address(requestDto.getAddress())
+                .address(combineAddress(requestDto.getBaseAddress(), requestDto.getDetailAddress()))
+                .baseAddress(requestDto.getBaseAddress())
                 .provider(Provider.LOCAL)
                 .role(Role.PROTECTOR)
                 .protectorCode(uniqueCode)
@@ -122,6 +127,7 @@ public class MemberService {
                 .build();
 
         Member savedProtector = memberRepository.save(newProtector);
+        applyCoordinates(savedProtector, savedProtector.getBaseAddress());
 
         return RegisterProtectorResponseDto.of(savedProtector);
     }
@@ -154,13 +160,15 @@ public class MemberService {
                 .name(requestDto.getName())
                 .phone(requestDto.getPhone())
                 .password(passwordEncoder.encode(requestDto.getPassword()))
-                .address(requestDto.getAddress())
+                .address(combineAddress(requestDto.getBaseAddress(), requestDto.getDetailAddress()))
+                .baseAddress(requestDto.getBaseAddress())
                 .provider(Provider.LOCAL)
                 .role(Role.WARD)
                 .authLevel(AuthLevel.USER)
                 .build();
 
         Member savedWard = memberRepository.save(newWard);
+        applyCoordinates(savedWard, savedWard.getBaseAddress());
 
         reportSettingService.createDefaultSetting(savedWard);
         wardSettingService.createDefaultSetting(savedWard);
@@ -272,12 +280,14 @@ public class MemberService {
                 .role(requestDto.getRole())
                 .name(requestDto.getName())
                 .phone(requestDto.getPhone())
-                .address(requestDto.getAddress())
+                .address(combineAddress(requestDto.getBaseAddress(), requestDto.getDetailAddress()))
+                .baseAddress(requestDto.getBaseAddress())
                 .protectorCode(protectorCode)
                 .authLevel(AuthLevel.USER)
                 .build();
 
         Member savedMember = memberRepository.save(newmember);
+        applyCoordinates(savedMember, savedMember.getBaseAddress());
 
         // 돌봄대상자라면 레포트 생성
         if (requestDto.getRole() == Role.WARD) {
@@ -524,5 +534,26 @@ public class MemberService {
 
         // 전화번호 변경
         member.updatePhone(newPhone);
+    }
+
+
+    private String combineAddress(String baseAddress, String detailAddress) {
+        if(detailAddress == null || detailAddress.isBlank()) {
+            return baseAddress;
+        }
+        return baseAddress + " " + detailAddress;
+    }
+
+
+    private void applyCoordinates(Member member, String baseAddress) {
+        kakaoGeocodingService.geocode(baseAddress)
+                .ifPresentOrElse(
+                        coordinate -> {
+                            member.updateCoordinates(coordinate.latitude(), coordinate.longitude());
+                            log.info("[좌표 변환 성공] 회원ID: {}, 주소: {}, lat: {}, lng: {}",
+                                    member.getMemberId(), baseAddress, coordinate.latitude(), coordinate.longitude());
+                        },
+                        () -> log.warn("[좌표 변환 실패] 회원ID: {}, 주소: {}", member.getMemberId(), baseAddress)
+                );
     }
 }

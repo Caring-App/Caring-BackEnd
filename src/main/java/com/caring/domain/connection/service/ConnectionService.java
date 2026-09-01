@@ -8,6 +8,7 @@ import com.caring.domain.member.repository.MemberDiseaseRepository;
 import com.caring.domain.member.repository.MemberRepository;
 import com.caring.domain.setting.entity.WardSetting;
 import com.caring.domain.setting.repository.WardSettingRepository;
+import com.caring.global.geocoding.service.KakaoGeocodingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ public class ConnectionService {
     //고유코드로 대상자 찾을 때 필요
     private final MemberRepository memberRepository;
     private final WardSettingRepository wardSettingRepository;
+    private final KakaoGeocodingService kakaoGeocodingService;
 
     // 보호자와 돌봄대상자 연결하는 메소드
     @Transactional // DB 작업 오류시 롤백
@@ -106,16 +108,26 @@ public class ConnectionService {
     // 대상자 정보 수정
     @Transactional
     public WardDetailResponseDto updateWard(Long protectorId, Long wardId, WardUpdateRequestDto requestDto) {
-           Connection connection = connectionRepository.findByProtector_MemberIdAndWard_MemberId(protectorId, wardId)
-                   .orElseThrow(() -> new IllegalArgumentException("해당 돌봄대상자에 대한 권한이 없습니다."));
+       Connection connection = connectionRepository.findByProtector_MemberIdAndWard_MemberId(protectorId, wardId)
+               .orElseThrow(() -> new IllegalArgumentException("해당 돌봄대상자에 대한 권한이 없습니다."));
 
-           Member ward = connection.getWard();
-           ward.updateProfile(
-                   requestDto.getNickname(),
-                   requestDto.getName(),
-                   requestDto.getPhone(),
-                   requestDto.getAddress()
-           );
+       Member ward = connection.getWard();
+
+       boolean baseAddressChanged = !ward.getBaseAddress().equals(requestDto.getBaseAddress());
+
+       String combinedAddress = combineAddress(requestDto.getBaseAddress(), requestDto.getDetailAddress());
+       ward.updateProfile(
+               requestDto.getNickname(),
+               requestDto.getName(),
+               requestDto.getPhone(),
+               combinedAddress,
+               requestDto.getBaseAddress()
+       );
+
+       if(baseAddressChanged) {
+           kakaoGeocodingService.geocode(requestDto.getBaseAddress())
+                   .ifPresent(coordinate -> ward.updateCoordinates(coordinate.latitude(), coordinate.longitude()));
+       }
 
         return WardDetailResponseDto.builder()
                 .wardId(ward.getMemberId())
@@ -124,5 +136,13 @@ public class ConnectionService {
                 .phone(ward.getPhone())
                 .address(ward.getAddress())
                 .build();
+    }
+
+
+    private String combineAddress(String baseAddress, String detailAddress) {
+        if(detailAddress == null || detailAddress.isBlank()) {
+            return baseAddress;
+        }
+        return baseAddress + " " + detailAddress;
     }
 }
