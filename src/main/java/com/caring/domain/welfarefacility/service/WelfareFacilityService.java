@@ -26,6 +26,7 @@ public class WelfareFacilityService {
     private final WelfareFacilityRepository welfareFacilityRepository;
     private final KakaoGeocodingService kakaoGeocodingService;
 
+    private static final long CACHE_VALID_MONTHS = 6;
     private static final Map<String, String> SIDO_FULL_NAME = Map.ofEntries(
             Map.entry("서울", "서울특별시"),
             Map.entry("부산", "부산광역시"),
@@ -66,7 +67,10 @@ public class WelfareFacilityService {
         List<Map<String, Object>> uncachedDetails = detailList.stream()
                 .filter(detail -> {
                     String fcltCd = (String) detail.get("fcltCd");
-                    return fcltCd != null && welfareFacilityRepository.findByFcltCd(fcltCd).isEmpty();
+                    if (fcltCd == null) return false;
+                    return welfareFacilityRepository.findByFcltCd(fcltCd)
+                            .map(f -> f.isStale(CACHE_VALID_MONTHS))
+                            .orElse(true);
                 })
                 .toList();
 
@@ -108,31 +112,50 @@ public class WelfareFacilityService {
             return null;
         }
 
-        return welfareFacilityRepository.findByFcltCd(fcltCd)
-                .orElseGet(() -> {
-                    Coordinate coordinate = geocodedMap.get(fcltCd);
-                    if (coordinate == null) {
-                        log.warn("[시설 좌표 변환 실패] fcltCd: {}", fcltCd);
-                        return null;
-                    }
+        Optional<WelfareFacility> cached = welfareFacilityRepository.findByFcltCd(fcltCd);
 
-                    String address = toStringOrNull(detail.get("fcltAddr"));
-                    String detailAddr = toStringOrNull(detail.get("fcltDtl_1Addr"));
-                    String fullAddress = address + (detailAddr != null ? " " + detailAddr : "");
+        if (cached.isPresent() && !cached.get().isStale(CACHE_VALID_MONTHS)) {
+            return cached.get();   // 캐시 있고 안 오래됐으면 그대로 재사용
+        }
 
-                    WelfareFacility newFacility = WelfareFacility.builder()
-                            .fcltCd(fcltCd)
-                            .fcltNm(toStringOrNull(detail.get("fcltNm")))
-                            .address(fullAddress)
-                            .latitude(coordinate.latitude())
-                            .longitude(coordinate.longitude())
-                            .telNo(toStringOrNull(detail.get("fcltTelNo")))
-                            .cprNm(toStringOrNull(detail.get("cprNm")))
-                            .homepageAddr(toStringOrNull(detail.get("homepageAddr")))
-                            .build();
+        // 캐시가 없거나, 오래돼서 갱신이 필요한 경우
+        Coordinate coordinate = geocodedMap.get(fcltCd);
+        if (coordinate == null) {
+            if (cached.isPresent()) {
+                log.warn("[캐시 갱신 실패, 기존 값 유지] fcltCd: {}", fcltCd);
+                return cached.get();   // 갱신용 좌표를 못 구했으면, 오래됐어도 기존 값이라도 반환
+            }
+            log.warn("[시설 좌표 변환 실패] fcltCd: {}", fcltCd);
+            return null;
+        }
 
-                    return welfareFacilityRepository.save(newFacility);
-                });
+        String address = toStringOrNull(detail.get("fcltAddr"));
+        String detailAddr = toStringOrNull(detail.get("fcltDtl_1Addr"));
+        String fullAddress = address + (detailAddr != null ? " " + detailAddr : "");
+        String fcltNm = toStringOrNull(detail.get("fcltNm"));
+        String telNo = toStringOrNull(detail.get("fcltTelNo"));
+        String cprNm = toStringOrNull(detail.get("cprNm"));
+        String homepageAddr = toStringOrNull(detail.get("homepageAddr"));
+
+        if (cached.isPresent()) {
+            WelfareFacility facility = cached.get();
+            facility.refresh(fcltNm, fullAddress, coordinate.latitude(), coordinate.longitude(),
+                    telNo, cprNm, homepageAddr);
+            return facility;   // 영속 상태라 save() 없이도 트랜잭션 커밋 시 자동 반영됨
+        }
+
+        WelfareFacility newFacility = WelfareFacility.builder()
+                .fcltCd(fcltCd)
+                .fcltNm(fcltNm)
+                .address(fullAddress)
+                .latitude(coordinate.latitude())
+                .longitude(coordinate.longitude())
+                .telNo(telNo)
+                .cprNm(cprNm)
+                .homepageAddr(homepageAddr)
+                .build();
+
+        return welfareFacilityRepository.save(newFacility);
     }
 
     private String toStringOrNull(Object value) {

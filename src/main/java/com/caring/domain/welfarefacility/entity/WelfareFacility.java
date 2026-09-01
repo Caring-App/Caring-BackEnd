@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -43,6 +45,9 @@ public class WelfareFacility {
     @Column(name = "homepage_addr", length = 255)
     private String homepageAddr;
 
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
     @Builder
     public WelfareFacility(String fcltCd,
                            String fcltNm,
@@ -62,5 +67,25 @@ public class WelfareFacility {
         this.telNo = telNo;
         this.cprNm = cprNm;
         this.homepageAddr = homepageAddr;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void refresh(String fcltNm,
+                        String address,
+                        Double latitude,
+                        Double longitude,
+                        String telNo, String cprNm, String homepageAddr) {
+        this.fcltNm = fcltNm;
+        this.address = address;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.telNo = telNo;
+        this.cprNm = cprNm;
+        this.homepageAddr = homepageAddr;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public boolean isStale(long validMonths) {
+        return updatedAt.isBefore(LocalDateTime.now().minusMonths(validMonths));
     }
 }

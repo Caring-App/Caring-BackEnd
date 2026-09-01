@@ -312,7 +312,8 @@ CREATE TABLE welfare_facility (
                                   longitude             DOUBLE NULL,
                                   tel_no                VARCHAR(20) NULL,
                                   cpr_nm                VARCHAR(100) NULL,
-                                  homepage_addr         VARCHAR(255) NULL
+                                  homepage_addr         VARCHAR(255) NULL,
+                                  updated_at            DATETIME NOT NULL
 );
 
 -- ===========================================================
