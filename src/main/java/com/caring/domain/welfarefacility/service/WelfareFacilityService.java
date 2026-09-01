@@ -105,7 +105,6 @@ public class WelfareFacilityService {
                     WelfareFacility newFacility = WelfareFacility.builder()
                             .fcltCd(fcltCd)
                             .fcltNm(toStringOrNull(detail.get("fcltNm")))
-                            .fcltKindNm(toStringOrNull(detail.get("fcltKindNm")))
                             .address(fullAddress)
                             .latitude(coordinate.latitude())
                             .longitude(coordinate.longitude())

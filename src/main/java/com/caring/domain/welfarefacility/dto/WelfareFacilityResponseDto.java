@@ -6,7 +6,6 @@ import lombok.Getter;
 @Getter
 public class WelfareFacilityResponseDto {
     private final String fcltNm;
-    private final String fcltKindNm;
     private final String address;
     private final String telNo;
     private final String cprNm;
@@ -15,7 +14,6 @@ public class WelfareFacilityResponseDto {
 
     public WelfareFacilityResponseDto(WelfareFacility facility, double distanceKm) {
         this.fcltNm = facility.getFcltNm();
-        this.fcltKindNm = facility.getFcltKindNm();
         this.address = facility.getAddress();
         this.telNo = facility.getTelNo();
         this.cprNm = facility.getCprNm();
