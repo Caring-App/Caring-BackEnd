@@ -109,6 +109,9 @@ public class WelfareFacilityService {
                             .address(fullAddress)
                             .latitude(coordinate.latitude())
                             .longitude(coordinate.longitude())
+                            .telNo(toStringOrNull(detail.get("fcltTelNo")))
+                            .cprNm(toStringOrNull(detail.get("cprNm")))
+                            .homepageAddr(toStringOrNull(detail.get("homepageAddr")))
                             .build();
 
                     return welfareFacilityRepository.save(newFacility);

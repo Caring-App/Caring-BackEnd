@@ -34,18 +34,33 @@ public class WelfareFacility {
     @Column(name = "longitude")
     private Double longitude;
 
+    @Column(name = "tel_no", length = 20)
+    private String telNo;
+
+    @Column(name = "cpr_nm", length = 100)
+    private String cprNm;
+
+    @Column(name = "homepage_addr", length = 255)
+    private String homepageAddr;
+
     @Builder
     public WelfareFacility(String fcltCd,
                            String fcltNm,
                            String fcltKindNm,
                            String address,
                            Double latitude,
-                           Double longitude) {
+                           Double longitude,
+                           String telNo,
+                           String cprNm,
+                           String homepageAddr) {
         this.fcltCd = fcltCd;
         this.fcltNm = fcltNm;
         this.fcltKindNm = fcltKindNm;
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.telNo = telNo;
+        this.cprNm = cprNm;
+        this.homepageAddr = homepageAddr;
     }
 }

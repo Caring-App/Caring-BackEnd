@@ -309,7 +309,10 @@ CREATE TABLE welfare_facility (
                                   fclt_kind_nm          VARCHAR(100) NULL,
                                   address               VARCHAR(255) NULL,
                                   latitude              DOUBLE NULL,
-                                  longitude             DOUBLE NULL
+                                  longitude             DOUBLE NULL,
+                                  tel_no                VARCHAR(20) NULL,
+                                  cpr_nm                VARCHAR(100) NULL,
+                                  homepage_addr         VARCHAR(255) NULL
 );
 
 -- ===========================================================
