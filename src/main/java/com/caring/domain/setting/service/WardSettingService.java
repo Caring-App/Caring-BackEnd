@@ -34,8 +34,8 @@ public class WardSettingService {
     }
 
 
-    public WardSettingResponseDto getSetting(Long protectorId, Long wardId) {
-        validateProtectorOfWard(protectorId, wardId);
+    public WardSettingResponseDto getSetting(Long requesterId, Long wardId) {
+        validateAccess(requesterId, wardId);
 
         WardSetting wardSetting = wardSettingRepository.findByMember_MemberId(wardId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 돌봄대상자의 설정 정보가 존재하지 않습니다."));
@@ -62,6 +62,16 @@ public class WardSettingService {
         }
 
         return new WardSettingResponseDto(wardSetting);
+    }
+
+
+    private void validateAccess(Long requesterId, Long wardId) {
+        boolean isSelf = requesterId.equals(wardId);
+        boolean isConnectedProtector = connectionRepository.existsByProtector_MemberIdAndWard_MemberId(requesterId, wardId);
+
+        if(!isSelf && !isConnectedProtector) {
+            throw new IllegalArgumentException("조회 권한이 없습니다.");
+        }
     }
 
 
