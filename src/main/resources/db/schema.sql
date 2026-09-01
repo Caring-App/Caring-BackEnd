@@ -5,6 +5,8 @@ USE caringdb;
 -- ===========================================================
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS welfare_facility;
+DROP TABLE IF EXISTS policy;
 DROP TABLE IF EXISTS system_log;
 DROP TABLE IF EXISTS notification_log;
 DROP TABLE IF EXISTS location_log;
@@ -295,6 +297,19 @@ CREATE TABLE policy (
                         title       VARCHAR(100) NOT NULL,
                         content     TEXT NOT NULL,
                         updated_at  DATETIME NOT NULL
+);
+
+-- ===========================================================
+-- 공공복지시설 테이블
+-- ===========================================================
+CREATE TABLE welfare_facility (
+                                  welfare_facility_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                  fclt_cd              VARCHAR(20) NOT NULL UNIQUE,
+                                  fclt_nm               VARCHAR(100) NOT NULL,
+                                  fclt_kind_nm          VARCHAR(100) NULL,
+                                  address               VARCHAR(255) NULL,
+                                  latitude              DOUBLE NULL,
+                                  longitude             DOUBLE NULL
 );
 
 -- ===========================================================
