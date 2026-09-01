@@ -4,6 +4,7 @@ import com.caring.domain.member.entity.Member;
 import com.caring.domain.welfarefacility.dto.WelfareFacilityResponseDto;
 import com.caring.domain.welfarefacility.entity.WelfareFacility;
 import com.caring.domain.welfarefacility.repository.WelfareFacilityRepository;
+import com.caring.global.geocoding.service.Coordinate;
 import com.caring.global.geocoding.service.KakaoGeocodingService;
 import com.caring.global.common.GeoUtils;
 import com.caring.global.welfareapi.WelfareFacilityApiClient;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -51,24 +54,43 @@ public class WelfareFacilityService {
 
         String sigunguNm = extractSigungu(ward.getBaseAddress());
 
-        // 1. 목록 조회해서 jrsdSggCd 확보
         List<Map<String, Object>> rawList = apiClient.getFacilityList(sigunguNm);
         if (rawList.isEmpty()) {
             return List.of();
         }
         Long jrsdSggCd = ((Number) rawList.get(0).get("jrsdSggCd")).longValue();
 
-        // 2. 그 구 전체 상세정보 한 번에 조회
         List<Map<String, Object>> detailList = apiClient.getFacilityDetailsBySigungu(jrsdSggCd);
 
-        // 3. 각 시설 캐싱 (fcltCd로 조회/생성)
+        // 1단계: 순차로 캐시 여부 확인
+        List<Map<String, Object>> uncachedDetails = detailList.stream()
+                .filter(detail -> {
+                    String fcltCd = (String) detail.get("fcltCd");
+                    return fcltCd != null && welfareFacilityRepository.findByFcltCd(fcltCd).isEmpty();
+                })
+                .toList();
+
+        // 2단계: 캐시 없는 것들만 geocoding 병렬 처리
+        Map<String, Coordinate> geocodedMap = new ConcurrentHashMap<>();
+        uncachedDetails.parallelStream()
+                .forEach(detail -> {
+                    String fcltCd = (String) detail.get("fcltCd");
+                    String address = toStringOrNull(detail.get("fcltAddr"));
+                    if (address == null) {
+                        return;
+                    }
+                    kakaoGeocodingService.geocode(address).ifPresent(coordinate ->
+                            geocodedMap.put(fcltCd, coordinate)
+                    );
+                });
+
+        // 3단계: 순차로 DB 저장/조회
         List<WelfareFacility> facilities = detailList.stream()
-                .map(this::getOrCacheFacilityFromDetail)
+                .map(detail -> getOrCacheFacilityFromDetail(detail, geocodedMap))
                 .filter(Objects::nonNull)
                 .filter(f -> f.getLatitude() != null && f.getLongitude() != null)
                 .toList();
 
-        // 4. 거리 계산 및 필터링
         return facilities.stream()
                 .map(f -> {
                     double distanceKm = GeoUtils.calculateDistance(
@@ -80,7 +102,7 @@ public class WelfareFacilityService {
                 .toList();
     }
 
-    private WelfareFacility getOrCacheFacilityFromDetail(Map<String, Object> detail) {
+    private WelfareFacility getOrCacheFacilityFromDetail(Map<String, Object> detail, Map<String, Coordinate> geocodedMap) {
         String fcltCd = (String) detail.get("fcltCd");
         if (fcltCd == null) {
             return null;
@@ -88,19 +110,15 @@ public class WelfareFacilityService {
 
         return welfareFacilityRepository.findByFcltCd(fcltCd)
                 .orElseGet(() -> {
-                    String address = toStringOrNull(detail.get("fcltAddr"));
-                    if (address == null) {
+                    Coordinate coordinate = geocodedMap.get(fcltCd);
+                    if (coordinate == null) {
+                        log.warn("[시설 좌표 변환 실패] fcltCd: {}", fcltCd);
                         return null;
                     }
 
+                    String address = toStringOrNull(detail.get("fcltAddr"));
                     String detailAddr = toStringOrNull(detail.get("fcltDtl_1Addr"));
                     String fullAddress = address + (detailAddr != null ? " " + detailAddr : "");
-
-                    var coordinate = kakaoGeocodingService.geocode(address).orElse(null);
-                    if (coordinate == null) {
-                        log.warn("[시설 좌표 변환 실패] fcltCd: {}, 주소: {}", fcltCd, address);
-                        return null;
-                    }
 
                     WelfareFacility newFacility = WelfareFacility.builder()
                             .fcltCd(fcltCd)
