@@ -16,9 +16,9 @@ public class WardSettingController {
     private final WardSettingService wardSettingService;
 
     @GetMapping("/{wardId}")
-    public ResponseEntity<WardSettingResponseDto> getSetting(@AuthenticationPrincipal Long protectorId,
+    public ResponseEntity<WardSettingResponseDto> getSetting(@AuthenticationPrincipal Long requesterId,
                                                                  @PathVariable Long wardId) {
-        return ResponseEntity.ok(wardSettingService.getSetting(protectorId, wardId));
+        return ResponseEntity.ok(wardSettingService.getSetting(requesterId, wardId));
     }
 
     @PatchMapping("/{wardId}")
