@@ -11,6 +11,7 @@ import com.caring.domain.report.service.ReportSettingService;
 import com.caring.domain.setting.service.WardSettingService;
 import com.caring.global.geocoding.service.KakaoGeocodingService;
 import com.caring.global.jwt.JwtUtil;
+import com.caring.global.sms.service.CoolSmsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -41,6 +42,7 @@ public class MemberService {
     private final ConnectionRepository connectionRepository;
     private final WardSettingService wardSettingService;
     private final KakaoGeocodingService kakaoGeocodingService;
+    private final CoolSmsService coolSmsService;
 
 
     private static class SmsVerification {
@@ -192,16 +194,16 @@ public class MemberService {
     }
 
 
-    // 가짜 SMS 발송 및 번호 저장
-    public void sendFakeSms(String phone) {
+    // SMS 발송 및 번호 저장
+    public void sendSms(String phone) {
         String code = String.format("%06d", ThreadLocalRandom.current().nextInt(0, 1_000_000));
         LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(3);
 
         smsVerificationStorage.put(phone, new SmsVerification(code, expiredAt));
 
-        System.out.println("────── [SMS 발송 로그] ──────");
-        System.out.println("수신번호: " + phone + " | 인증번호: " + code + " | 만료: " + expiredAt);
-        System.out.println("───────────────────────────");
+        coolSmsService.sendSms(phone, "[케어링] 인증번호는 "+ code + "입니다.");
+
+        log.info("[SMS 발송 요청] 수신번호: {}, 만료: {}", phone, expiredAt);
     }
 
 
