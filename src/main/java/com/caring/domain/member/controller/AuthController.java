@@ -44,13 +44,13 @@ public class AuthController {
     }
 
     /*
-     * 핸드폰 인증번호 발송 (가짜 문자 발송)
+     * 핸드폰 인증번호 발송
      * POST http://localhost:8080/api/auth/sms/send?phone=01012345678
      */
     @PostMapping("/sms/send")
     public ResponseEntity<String> sendSms(@RequestParam("phone") String phone) {
-        memberService.sendFakeSms(phone);
-        return ResponseEntity.ok("인증번호가 발송되었습니다. (테스트용)");
+        memberService.sendSms(phone);
+        return ResponseEntity.ok("인증번호가 발송되었습니다.");
     }
 
     /*

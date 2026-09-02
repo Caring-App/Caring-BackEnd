@@ -54,6 +54,9 @@ dependencies {
 
 	// Google Cloud Text-to-Speech
 	implementation 'com.google.cloud:google-cloud-texttospeech:2.42.0'
+
+	// 쿨SMS(CoolSMS/솔라피)
+	implementation 'net.nurigo:sdk:4.3.0'
 }
 
 tasks.named('test') {
