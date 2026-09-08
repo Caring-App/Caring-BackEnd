@@ -37,6 +37,12 @@ public class TaskScheduleController {
         return ResponseEntity.ok(taskScheduleService.getTasksByDate(protectorId, wardId, date));
     }
 
+    @GetMapping("/today")
+    public ResponseEntity<List<TaskScheduleResponseDto>> getTodayTasks(
+            @AuthenticationPrincipal Long wardId) {
+        return ResponseEntity.ok(taskScheduleService.getTodayTasksForWard(wardId));
+    }
+
     @PatchMapping("/{taskId}")
     public ResponseEntity<TaskScheduleResponseDto> updateTask(
             @AuthenticationPrincipal Long protectorId,
