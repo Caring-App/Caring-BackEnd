@@ -74,6 +74,15 @@ public class TaskScheduleService {
     }
 
 
+    public List<TaskScheduleResponseDto> getTodayTasksForWard(Long wardId) {
+        LocalDate today = LocalDate.now();
+        return taskScheduleRepository.findByWard_MemberIdAndTaskDateOrderByTaskTimeAsc(wardId, today)
+                .stream()
+                .map(TaskScheduleResponseDto::new)
+                .toList();
+    }
+
+
     @Transactional
     public TaskScheduleResponseDto updateTask(Long protectorId, Long taskId, TaskScheduleRequestDto requestDto) {
         TaskSchedule taskSchedule = taskScheduleRepository.findById(taskId)
@@ -127,6 +136,7 @@ public class TaskScheduleService {
             schedule.updateVoiceFile(newVoiceFileUrl);
         }
     }
+
 
     private String resolveVoiceFileUrl(Member ward, TaskScheduleRequestDto requestDto) {
         AlarmValidationUtil.validateVoiceSetting(requestDto.getAlarmType(), requestDto.getVoiceFileUrl());
