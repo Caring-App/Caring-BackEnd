@@ -68,7 +68,7 @@ public class PillLogService {
         connectionRepository.findByWard(ward).ifPresentOrElse(connection -> {
             Member protector = connection.getProtector();
 
-            String title = "✅ 복약 완료";
+            String title = "복약 완료";
             String body = ward.getName() + " 님 [" + pillLabel + "] 복용이 확인되었습니다.";
 
             notificationLogService.saveLog(protector, title, body);
