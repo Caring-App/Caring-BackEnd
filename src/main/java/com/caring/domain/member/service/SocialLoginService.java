@@ -21,7 +21,6 @@ public class SocialLoginService {
         return switch (provider){
             case KAKAO -> getKakaoUserInfo(accessToken);
             case NAVER -> getNaverUserInfo(accessToken);
-            case GOOGLE -> getGoogleUserInfo(accessToken);
             default -> throw new IllegalArgumentException("지원하지 않는 소셜 로그인입니다: "+provider);
         };
     }
@@ -68,24 +67,6 @@ public class SocialLoginService {
         return SocialUserInfo.builder()
                 .provider(Provider.NAVER)
                 .providerId(providerId)
-                .build();
-    }
-    private SocialUserInfo getGoogleUserInfo(String accessToken){
-
-        // 구글 사용자 정보 조회 API 호출
-        // accessToken이 유효하지 않으면 여기서 에러
-        Map<String, Object> response = restClient.get() // GET 방식으로 요청
-                .uri("https://www.googleapis.com/oauth2/v3/userinfo") // 요청 주소 설정
-                .header("Authorization","Bearer "+accessToken) // 인증 헤더
-                .retrieve() // 요청 전송
-                .body(Map.class); // 응답 JSON을 Map으로 변환
-
-        // 구글 응답 예시: { "sub": "110169484474386276334", "email": "...", ... }
-        String providerId = (String) response.get("sub");
-
-        return SocialUserInfo.builder()
-                .provider(Provider.GOOGLE)
-                .providerId(providerId.toString())
                 .build();
     }
 }
