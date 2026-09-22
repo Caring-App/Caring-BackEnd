@@ -41,7 +41,7 @@ public class CalendarNotificationScheduler {
             if(fcmToken != null && !fcmToken.isBlank()) {
                 log.info("[캘린더 알림 발송 시도] 대상자: {}, 일정: {}", wardName, taskName);
 
-                String title = "🔔 오늘의 일정 안내";
+                String title = "오늘의 일정 안내";
                 String body = wardName + " 어르신, [" + taskName + "] 일정이 곧 있어요!";
 
                 Map<String, String> dataPayload = new HashMap<>();

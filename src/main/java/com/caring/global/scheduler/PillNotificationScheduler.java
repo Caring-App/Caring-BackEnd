@@ -63,7 +63,7 @@ public class PillNotificationScheduler {
                 if (fcmToken != null && !fcmToken.isBlank()) {
                     log.info("[푸시 알림 발송 시도] 대상자: {}, 약물 타입: {}", wardName, pillLabel);
 
-                    String title = "💊 복약 시간 알림";
+                    String title = "복약 시간 알림";
                     String body = wardName + " 어르신, [" + pillLabel + "] 드실 시간입니다! 잊지 말고 챙겨 드세요.";
 
                     Map<String, String> dataPayload = new HashMap<>();
@@ -119,7 +119,7 @@ public class PillNotificationScheduler {
                 if (fcmToken != null && !fcmToken.isBlank()) {
                     log.info("[푸시 알림 발송 시도] 대상자: {}, 약물 타입: {}", wardName, pillLabel);
 
-                    String title = "💊 복약  재알림";
+                    String title = "복약  재알림";
                     String body = wardName + " 어르신, 아직 [" + pillLabel + "] 확인이 안됐어요. 다시 확인해주세요!";
 
                     String voiceFileUrl = schedule.getRetryVoiceFileUrl() != null
@@ -151,7 +151,7 @@ public class PillNotificationScheduler {
         connectionRepository.findByWard(ward).ifPresentOrElse(connection -> {
             Member protector = connection.getProtector();
 
-            String title = "⚠️ 미응답 알림";
+            String title = "미응답 알림";
             String body = ward.getName() + " 님이 [" + schedule.getPillName().getDescription() + "] 복약 확인을 하지 않으셨어요.";
 
             notificationLogService.saveLog(protector, title, body);
