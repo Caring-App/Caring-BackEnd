@@ -39,4 +39,9 @@ public class MoodCheckController {
 
         return ResponseEntity.ok(moodCheckService.getTodayMood(protectorId, wardId));
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<MoodCheckResponseDto> getMyTodayMood(@AuthenticationPrincipal Long wardId) {
+        return ResponseEntity.ok(moodCheckService.getTodayMoodForWard(wardId));
+    }
 }

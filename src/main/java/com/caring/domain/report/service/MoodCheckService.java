@@ -72,12 +72,24 @@ public class MoodCheckService {
         Connection exsiting = connectionRepository.findByProtector_MemberIdAndWard_MemberId(protectorId,wardId)
                 .orElseThrow(()->new IllegalArgumentException("권한이 없습니다."));
 
-        // 2. 오늘 기록 조회 (없으면 예외)
+        return findTodayMoodOrThrow(wardId);
+    }
+
+    /**
+     * 돌봄대상자 본인이 자신의 오늘 기분 상태 조회 (권한 검증 불필요 - 본인 토큰이므로)
+     */
+    public MoodCheckResponseDto getTodayMoodForWard(Long wardId) {
+        return findTodayMoodOrThrow(wardId);
+    }
+
+    /**
+     * 오늘 기록 조회 (없으면 예외) 후 DTO로 변환하는 공통 로직
+     */
+    private MoodCheckResponseDto findTodayMoodOrThrow(Long wardId) {
         LocalDate today = LocalDate.now();
         MoodCheck todayMood = moodCheckRepository.findByWardMemberIdAndRecordDate(wardId,today)
                 .orElseThrow(()->new IllegalArgumentException("아직 오늘의 기록이 없습니다."));
 
-        // 3. DTO로 변환해서 반환
         return MoodCheckResponseDto.builder()
                 .moodStatus(todayMood.getMoodStatus())
                 .recordDate(todayMood.getRecordDate())
