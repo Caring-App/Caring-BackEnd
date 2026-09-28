@@ -36,12 +36,15 @@ public class MoodCheckController {
     public ResponseEntity<MoodCheckResponseDto> getTodayMood(
             @AuthenticationPrincipal Long protectorId,
             @PathVariable Long wardId) {
-
-        return ResponseEntity.ok(moodCheckService.getTodayMood(protectorId, wardId));
+        return moodCheckService.getTodayMood(protectorId, wardId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @GetMapping("/me")
     public ResponseEntity<MoodCheckResponseDto> getMyTodayMood(@AuthenticationPrincipal Long wardId) {
-        return ResponseEntity.ok(moodCheckService.getTodayMoodForWard(wardId));
+        return moodCheckService.getTodayMoodForWard(wardId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 }
