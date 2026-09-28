@@ -32,9 +32,11 @@ public class TaskScheduleController {
     public ResponseEntity<List<TaskScheduleResponseDto>> getTasks(
             @AuthenticationPrincipal Long protectorId,
             @RequestParam Long wardId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
-        return ResponseEntity.ok(taskScheduleService.getTasksByDate(protectorId, wardId, date));
+        return ResponseEntity.ok(taskScheduleService.getTasksByDate(protectorId, wardId, date, startDate, endDate));
     }
 
     @GetMapping("/today")

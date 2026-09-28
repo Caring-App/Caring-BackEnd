@@ -62,12 +62,27 @@ public class TaskScheduleService {
     }
 
 
-    public List<TaskScheduleResponseDto> getTasksByDate(Long protectorId, Long wardId, LocalDate date) {
+    public List<TaskScheduleResponseDto> getTasksByDate(Long protectorId, Long wardId, LocalDate date, LocalDate startDate, LocalDate endDate) {
         validateProtectorOfWard(protectorId, wardId);
+
+        if(startDate != null || endDate != null) {
+            if(startDate == null || endDate == null) {
+                throw new IllegalArgumentException("startDate와 endDate는 함께 전달되어야 합니다.");
+            }
+            if(startDate.isAfter(endDate)) {
+                throw new IllegalArgumentException("startDate는 endDate보다 이후일 수 없습니다.");
+            }
+            return taskScheduleRepository
+                    .findByWard_MemberIdAndTaskDateBetweenOrderByTaskDateAscTaskTimeAsc(wardId, startDate, endDate)
+                    .stream()
+                    .map(TaskScheduleResponseDto::new)
+                    .toList();
+        }
 
         LocalDate targetDate = (date != null) ? date : LocalDate.now();
 
-        return taskScheduleRepository.findByWard_MemberIdAndTaskDateOrderByTaskTimeAsc(wardId, targetDate)
+        return taskScheduleRepository
+                .findByWard_MemberIdAndTaskDateOrderByTaskTimeAsc(wardId, targetDate)
                 .stream()
                 .map(TaskScheduleResponseDto::new)
                 .toList();
