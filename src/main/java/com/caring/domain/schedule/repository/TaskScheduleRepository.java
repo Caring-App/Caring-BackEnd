@@ -11,4 +11,5 @@ public interface TaskScheduleRepository extends JpaRepository<TaskSchedule, Long
     List<TaskSchedule> findByWard_MemberIdAndTaskDateOrderByTaskTimeAsc(Long wardId, LocalDate taskDate);
     List<TaskSchedule> findByTaskDateAndTtsVoiceTime(LocalDate taskDate, LocalTime ttsVoiceTime);
     List<TaskSchedule> findByWard_MemberId(Long wardId);
+    List<TaskSchedule> findByWard_MemberIdAndTaskDateBetweenOrderByTaskDateAscTaskTimeAsc(Long wardId, LocalDate startDate, LocalDate endDate);
 }
