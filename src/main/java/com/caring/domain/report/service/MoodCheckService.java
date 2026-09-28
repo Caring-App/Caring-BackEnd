@@ -66,22 +66,33 @@ public class MoodCheckService {
     /**
      * 보호자가 대상자의 오늘 기분 상태 조회
      */
-    public MoodCheckResponseDto getTodayMood(Long protectorId, Long wardId) {
+    public Optional<MoodCheckResponseDto> getTodayMood(Long protectorId, Long wardId) {
 
-        // 1. 권한 검증 (연결 안 돼있으면 예외)
+        // 1. 권한 검증 (연결 안 돼있으면 예외 - 400 에러)
         Connection exsiting = connectionRepository.findByProtector_MemberIdAndWard_MemberId(protectorId,wardId)
                 .orElseThrow(()->new IllegalArgumentException("권한이 없습니다."));
 
-        // 2. 오늘 기록 조회 (없으면 예외)
-        LocalDate today = LocalDate.now();
-        MoodCheck todayMood = moodCheckRepository.findByWardMemberIdAndRecordDate(wardId,today)
-                .orElseThrow(()->new IllegalArgumentException("아직 오늘의 기록이 없습니다."));
+        return findTodayMood(wardId);
+    }
 
-        // 3. DTO로 변환해서 반환
-        return MoodCheckResponseDto.builder()
-                .moodStatus(todayMood.getMoodStatus())
-                .recordDate(todayMood.getRecordDate())
-                .checkedAt(todayMood.getCheckedAt())
-                .build();
+    /**
+     * 돌봄대상자 본인이 자신의 오늘 기분 상태 조회 (권한 검증 불필요 - 본인 토큰이므로)
+     */
+    public Optional<MoodCheckResponseDto> getTodayMoodForWard(Long wardId) {
+        return findTodayMood(wardId);
+    }
+
+    /**
+     * 오늘 기록 조회 (없으면 예외) 후 DTO로 변환하는 공통 로직
+     */
+    private Optional<MoodCheckResponseDto> findTodayMood(Long wardId) {
+        LocalDate today = LocalDate.now();
+
+        return moodCheckRepository.findByWardMemberIdAndRecordDate(wardId, today)
+                .map(todayMood -> MoodCheckResponseDto.builder()
+                        .moodStatus(todayMood.getMoodStatus())
+                        .recordDate(todayMood.getRecordDate())
+                        .checkedAt(todayMood.getCheckedAt())
+                        .build());
     }
 }
