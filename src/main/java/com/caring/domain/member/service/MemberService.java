@@ -527,9 +527,6 @@ public class MemberService {
             throw new IllegalArgumentException("휴대폰 인증이 완료되지 않았습니다.");
         }
 
-        // 인증 정보 제거
-        smsVerificationStorage.remove(requestDto.getNewPhone());
-
         // 기존 번호와 다르면 중복 체크
         if (!member.getPhone().equals(newPhone)) {
             memberRepository.findByPhone(newPhone)
@@ -537,6 +534,9 @@ public class MemberService {
                         throw new IllegalArgumentException("이미 사용 중인 전화번호입니다.");
                     });
         }
+
+        // 인증 정보 제거
+        smsVerificationStorage.remove(newPhone);
 
         // 전화번호 변경
         member.updatePhone(newPhone);
