@@ -103,4 +103,17 @@ public class Member {
         this.latitude = latitude;
         this.longitude = longitude;
     }
+
+    public String getDetailAddress() {
+        if(address == null || baseAddress == null) {
+            return null;
+        }
+        if(address.equals(baseAddress)) {
+            return "";
+        }
+        if(address.startsWith(baseAddress)) {
+            return address.substring(baseAddress.length()).trim();
+        }
+        return address;
+    }
 }

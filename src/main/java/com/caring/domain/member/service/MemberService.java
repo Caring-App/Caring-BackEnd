@@ -134,7 +134,6 @@ public class MemberService {
         return RegisterProtectorResponseDto.of(savedProtector);
     }
 
-
     // 돌봄대상자 회원가입
     @Transactional
     public RegisterWardResponseDto registerWard(RegisterWardRequestDto requestDto){
@@ -193,7 +192,6 @@ public class MemberService {
         return RegisterWardResponseDto.of(savedWard, savedDiseaseNames);
     }
 
-
     // SMS 발송 및 번호 저장
     public void sendSms(String phone) {
         String code = String.format("%06d", ThreadLocalRandom.current().nextInt(0, 1_000_000));
@@ -205,7 +203,6 @@ public class MemberService {
 
         log.info("[SMS 발송 요청] 수신번호: {}, 만료: {}", phone, expiredAt);
     }
-
 
     // 사용자가 입력한 인증번호 검증
     public boolean verifySmsCode(String phone, String code) {
@@ -227,7 +224,6 @@ public class MemberService {
         verification.verified = true;
         return true;
     }
-
 
     // 로그인
     @Transactional
@@ -401,7 +397,6 @@ public class MemberService {
         member.updatePassword(encodedPassword);
     }
 
-
     // FCM Token 발급
     @Transactional
     public void updateFcmToken(Long memberId, FcmTokenRequestDto requestDto) {
@@ -409,6 +404,15 @@ public class MemberService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         member.updateFcmToken(requestDto.getFcmToken());
+    }
+
+    // 마이페이지 - 내 정보 조회
+    @Transactional(readOnly = true)
+    public MemberMeResponseDto getMyInfo(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        return MemberMeResponseDto.of(member);
     }
 
     // 마이페이지 - 개인 정보 수정
@@ -538,14 +542,12 @@ public class MemberService {
         member.updatePhone(newPhone);
     }
 
-
     private String combineAddress(String baseAddress, String detailAddress) {
         if(detailAddress == null || detailAddress.isBlank()) {
             return baseAddress;
         }
         return baseAddress + " " + detailAddress;
     }
-
 
     private void applyCoordinates(Member member, String baseAddress) {
         kakaoGeocodingService.geocode(baseAddress)
