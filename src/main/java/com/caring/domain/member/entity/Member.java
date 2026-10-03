@@ -85,8 +85,9 @@ public class Member {
     }
 
     // 마이페이지 - 개인 정보 수정 메소드
-    public void updateAddress(String address){
+    public void updateAddress(String address, String baseAddress){
         this.address = address;
+        this.baseAddress = baseAddress;
     }
 
     // 마이페이지 - 알람 on/off
@@ -102,5 +103,18 @@ public class Member {
     public void updateCoordinates(Double latitude, Double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    public String getDetailAddress() {
+        if(address == null || baseAddress == null) {
+            return null;
+        }
+        if(address.equals(baseAddress)) {
+            return "";
+        }
+        if(address.startsWith(baseAddress)) {
+            return address.substring(baseAddress.length()).trim();
+        }
+        return address;
     }
 }

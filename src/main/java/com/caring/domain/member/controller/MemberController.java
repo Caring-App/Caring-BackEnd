@@ -1,13 +1,10 @@
 package com.caring.domain.member.controller;
 
-import com.caring.domain.member.dto.FcmTokenRequestDto;
-import com.caring.domain.member.dto.LoginResponseDto;
-import com.caring.domain.member.dto.MyPageUpdateRequest;
-import com.caring.domain.member.dto.PhoneChangeRequestDto;
-import com.caring.domain.member.dto.ProtectorCodeResponseDto;
+import com.caring.domain.member.dto.*;
 import com.caring.domain.member.entity.Member;
 import com.caring.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import okhttp3.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -69,5 +66,12 @@ public class MemberController {
     ) {
         memberService.changePhone(memberId, requestDto);
         return ResponseEntity.ok().build();
+    }
+
+    // 마이페이지 - 내 정보 조회
+    @GetMapping("/me")
+    public ResponseEntity<MemberMeResponseDto> getMyInfo(
+            @AuthenticationPrincipal Long memberId) {
+        return ResponseEntity.ok(memberService.getMyInfo(memberId));
     }
 }
