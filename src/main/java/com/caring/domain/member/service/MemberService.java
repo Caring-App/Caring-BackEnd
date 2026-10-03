@@ -419,10 +419,19 @@ public class MemberService {
     @Transactional
     public void updateMypage(Long memberId, MyPageUpdateRequest request){
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(()->new IllegalArgumentException("존재하지 않는 회원입니다.0"));
+                .orElseThrow(()->new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        // 1. 주소 수정 (전화번호는 SMS 인증이 필요해서 changePhone API로 분리됨)
-        member.updateAddress(request.getAddress());
+        // 1. 주소 수정 (baseAddress가 null이면 주소 변경 없이 기존 값 유지)
+        if(request.getBaseAddress() != null) {
+            boolean baseAddressChanged = !request.getBaseAddress().equals(member.getBaseAddress());
+
+            String combinedAddress = combineAddress(request.getBaseAddress(), request.getDetailAddress());
+            member.updateAddress(combinedAddress, request.getBaseAddress());
+
+            if(baseAddressChanged) {
+                applyCoordinates(member, request.getBaseAddress());
+            }
+        }
 
         // 2. 비밀번호 변경은 새 비밀번호 필드가 채워져있을 때만 실행
         // 비밀번호 칸 자체가 아예 null && 비어있거나 공백만 있어도 없는 걸로 처리

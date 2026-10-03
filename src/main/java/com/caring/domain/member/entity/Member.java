@@ -85,8 +85,9 @@ public class Member {
     }
 
     // 마이페이지 - 개인 정보 수정 메소드
-    public void updateAddress(String address){
+    public void updateAddress(String address, String baseAddress){
         this.address = address;
+        this.baseAddress = baseAddress;
     }
 
     // 마이페이지 - 알람 on/off
