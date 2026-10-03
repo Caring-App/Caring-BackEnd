@@ -11,6 +11,7 @@ import com.caring.domain.setting.entity.WardSetting;
 import com.caring.domain.setting.repository.WardSettingRepository;
 import com.caring.global.common.AlarmType;
 import com.caring.global.common.AlarmValidationUtil;
+import com.caring.global.file.service.VoiceFileService;
 import com.caring.global.tts.service.TtsFileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class TaskScheduleService {
     private final ConnectionRepository connectionRepository;
     private final TtsFileService ttsFileService;
     private final WardSettingRepository wardSettingRepository;
+    private final VoiceFileService voiceFileService;
 
     private void validateProtectorOfWard(Long protectorId, Long wardId) {
         boolean isConnected = connectionRepository.existsByProtector_MemberIdAndWard_MemberId(protectorId, wardId);
@@ -105,6 +107,7 @@ public class TaskScheduleService {
 
         validateProtectorOfWard(protectorId, taskSchedule.getWard().getMemberId());
 
+        String oldeVoiceFileUrl = taskSchedule.getVoiceFileUrl();
         String voiceFileUrl = resolveVoiceFileUrl(taskSchedule.getWard(), requestDto);
 
         taskSchedule.updateTask(
@@ -119,6 +122,10 @@ public class TaskScheduleService {
                 requestDto.getPlaceId()
         );
 
+        if(oldeVoiceFileUrl != null && !oldeVoiceFileUrl.isBlank() && !oldeVoiceFileUrl.equals(voiceFileUrl)) {
+            voiceFileService.deleteVoiceFile(oldeVoiceFileUrl);
+        }
+
         return new TaskScheduleResponseDto(taskSchedule);
     }
 
@@ -129,6 +136,8 @@ public class TaskScheduleService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 일정이 존재하지 않습니다. ID = " + taskId));
 
         validateProtectorOfWard(protectorId, taskSchedule.getWard().getMemberId());
+
+        voiceFileService.deleteVoiceFile(taskSchedule.getVoiceFileUrl());
 
         taskScheduleRepository.delete(taskSchedule);
     }

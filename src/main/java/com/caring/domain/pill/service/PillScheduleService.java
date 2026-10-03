@@ -13,6 +13,7 @@ import com.caring.domain.setting.entity.WardSetting;
 import com.caring.domain.setting.repository.WardSettingRepository;
 import com.caring.global.common.AlarmType;
 import com.caring.global.common.AlarmValidationUtil;
+import com.caring.global.file.service.VoiceFileService;
 import com.caring.global.tts.service.TtsFileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -34,6 +35,7 @@ public class PillScheduleService {
     private final ConnectionRepository connectionRepository;
     private final TtsFileService ttsFileService;
     private final WardSettingRepository wardSettingRepository;
+    private final VoiceFileService voiceFileService;
 
     private void validateProtectorOfWard(Long protectorId, Long wardId) {
         boolean isConnected = connectionRepository.existsByProtector_MemberIdAndWard_MemberId(protectorId, wardId);
@@ -88,6 +90,9 @@ public class PillScheduleService {
 
         validateProtectorOfWard(protectorId, pillSchedule.getWard().getMemberId());
 
+        String oldVoiceFileUrl = pillSchedule.getVoiceFileUrl();
+        String oldRetryVoiceFileUrl = pillSchedule.getRetryVoiceFileUrl();
+
         String voiceFileUrl = resolveVoiceFileUrl(pillSchedule.getWard(), requestDto);
         String retryVoiceFileUrl = resolveRetryVoiceFileUrl(pillSchedule.getWard(), requestDto);
 
@@ -100,6 +105,9 @@ public class PillScheduleService {
                 voiceFileUrl,
                 retryVoiceFileUrl
         );
+
+        deleteOldVoiceFileIfChanged(oldVoiceFileUrl, voiceFileUrl);
+        deleteOldVoiceFileIfChanged(oldRetryVoiceFileUrl, retryVoiceFileUrl);
 
         pillLogRepository.findByPillScheduleAndRecordDate(pillSchedule, LocalDate.now())
                 .ifPresent(pillLog -> {
@@ -132,6 +140,9 @@ public class PillScheduleService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 해당 복약 일정이 존재하지 않습니다. ID = " + id));
 
         validateProtectorOfWard(protectorId, pillSchedule.getWard().getMemberId());
+
+        voiceFileService.deleteVoiceFile(pillSchedule.getVoiceFileUrl());
+        voiceFileService.deleteVoiceFile(pillSchedule.getRetryVoiceFileUrl());
 
         pillScheduleRepository.delete(pillSchedule);
     }
@@ -193,5 +204,11 @@ public class PillScheduleService {
         return wardSettingRepository.findByMember(ward)
                 .map(WardSetting::getTtsRate)
                 .orElse(1.0);
+    }
+
+    private void deleteOldVoiceFileIfChanged(String oldUrl, String newUrl) {
+        if(oldUrl != null && !oldUrl.isBlank() && !oldUrl.equals(newUrl)) {
+            voiceFileService.deleteVoiceFile(oldUrl);
+        }
     }
 }
