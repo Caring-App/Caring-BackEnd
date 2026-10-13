@@ -32,6 +32,11 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionService.getConnectedWards(protectorId));
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<ConnectionStatusResponseDto> getMyConnection(@AuthenticationPrincipal Long wardId) {
+        return ResponseEntity.ok(connectionService.getMyConnectionStatus(wardId));
+    }
+
     @GetMapping("/{wardId}")
     public ResponseEntity<WardDetailResponseDto> getWardDetail(
             @AuthenticationPrincipal Long protectorId,
