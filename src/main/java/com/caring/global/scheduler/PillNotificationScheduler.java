@@ -156,13 +156,10 @@ public class PillNotificationScheduler {
 
             notificationLogService.saveLog(protector, title, body);
 
-            String protectorFcmToken = protector.getFcmToken();
-            if (protectorFcmToken != null && !protectorFcmToken.isBlank()) {
-                try {
-                    fcmService.sendNotification(protectorFcmToken, title, body);
-                } catch (Exception e) {
-                    log.error("[보호자 알림 발송 실패] 에러: {}", e.getMessage());
-                }
+            try {
+                fcmService.sendNotification(protector, title, body);
+            } catch (Exception e) {
+                log.error("[보호자 알림 발송 실패] 에러: {}", e.getMessage());
             }
         }, () -> log.warn("[보호자 알림 패스] 대상자 {}와 연결된 보호자가 없습니다.", ward.getName()));
     }
