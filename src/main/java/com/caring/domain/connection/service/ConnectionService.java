@@ -139,6 +139,21 @@ public class ConnectionService {
     }
 
 
+    // 돌봄대상자 본인의 보호자 연동 여부 조회
+    @Transactional(readOnly = true)
+    public ConnectionStatusResponseDto getMyConnectionStatus(Long wardId) {
+        return connectionRepository.findByWard_MemberId(wardId)
+                .map(connection -> ConnectionStatusResponseDto.builder()
+                        .connected(true)
+                        .protectorName(connection.getProtector().getName())
+                        .build())
+                .orElseGet(() -> ConnectionStatusResponseDto.builder()
+                        .connected(false)
+                        .protectorName(null)
+                        .build());
+    }
+
+
     private String combineAddress(String baseAddress, String detailAddress) {
         if(detailAddress == null || detailAddress.isBlank()) {
             return baseAddress;

@@ -23,4 +23,7 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
 
     // 이 protector와 이 ward의 연결 정보 자체를 가져오기 (상세 조회용 - 연결ID, 연결일시 포함)
     Optional<Connection> findByProtector_MemberIdAndWard_MemberId(Long protectorId, Long wardId);
+
+    // 돌봄대상자 본인의 연동 여부 확인용
+    Optional<Connection> findByWard_MemberId(Long wardId);
 }
